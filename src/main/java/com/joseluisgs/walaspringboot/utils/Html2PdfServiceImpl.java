@@ -7,11 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.Map;
 
 @Service
@@ -23,7 +19,7 @@ public class Html2PdfServiceImpl implements Html2PdfService {
     @Override
     public InputStreamResource html2PdfGenerator(Map<String, Object> data) {
         try {
-            PebbleTemplate compiledTemplate = pebbleEngine.getTemplate("app/pdf/facturapdf.peb");
+            PebbleTemplate compiledTemplate = pebbleEngine.getTemplate("app/pdf/facturapdf.peb.html");
             Writer writer = new StringWriter();
             compiledTemplate.evaluate(writer, data);
             final String html = writer.toString();
@@ -33,7 +29,7 @@ public class Html2PdfServiceImpl implements Html2PdfService {
             return new InputStreamResource(new FileInputStream(DEST));
 
         } catch (IOException e) {
-           System.err.println(e.toString());
+            System.err.println(e);
             return null;
         }
     }
