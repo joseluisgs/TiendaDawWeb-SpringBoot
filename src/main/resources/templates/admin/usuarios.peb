@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+{% include "fragments/head.peb" %}
+<body>
+{% include "fragments/navbar.peb" %}
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-people"></i> {{ i18n('nav.user.management') }}
+            </h1>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>{{ i18n('user.name') }}</th>
+                            <th>{{ i18n('user.email') }}</th>
+                            <th>{{ i18n('user.role') }}</th>
+                            <th>{{ i18n('user.registered') }}</th>
+                            <th>{{ i18n('btn.edit') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>
+                                <i class="bi bi-person-circle"></i> 
+                                {{ usuario.nombre }} {{ usuario.apellidos }}
+                            </td>
+                            <td>{{ usuario.email }}</td>
+                            <td>
+                                {% if usuario.rol == 'ADMIN' %}
+                                <span class="badge bg-danger">{{ usuario.rol }}</span>
+                                {% elseif usuario.rol == 'MODERATOR' %}
+                                <span class="badge bg-warning">{{ usuario.rol }}</span>
+                                {% else %}
+                                <span class="badge bg-info">{{ usuario.rol }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.fechaAlta | date('dd/MM/yyyy') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" disabled>
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer.peb" %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -25,12 +25,47 @@ public class ZonaPublicaController {
     }
 
     // Escuchamos en las dos rutas por defecto
-    // Tenemos una query, dels buscador y no es obligatoria
+    // Tenemos una query, del buscador y no es obligatoria
     @GetMapping({"/", "/index"})
-    public String index(Model model, @RequestParam(name="q", required=false) String query) {
-        if (query != null)
-            // La buscamos y se lo mandamos a los index en el campo producto con su modelo
-            model.addAttribute("productos", productoServicio.buscar(query));
+    public String index(Model model, 
+                       @RequestParam(name="q", required=false) String query,
+                       @RequestParam(name="categoria", required=false) String categoria,
+                       @RequestParam(name="minPrecio", required=false) Float minPrecio,
+                       @RequestParam(name="maxPrecio", required=false) Float maxPrecio) {
+        
+        List<Producto> productos = productoServicio.productosSinVender();
+        
+        // Aplicar filtros
+        if (query != null && !query.trim().isEmpty()) {
+            productos = productoServicio.buscar(query);
+        }
+        
+        if (categoria != null && !categoria.trim().isEmpty()) {
+            productos = productos.stream()
+                .filter(p -> categoria.equals(p.getCategoria()))
+                .toList();
+        }
+        
+        if (minPrecio != null && maxPrecio != null) {
+            productos = productos.stream()
+                .filter(p -> p.getPrecio() >= minPrecio && p.getPrecio() <= maxPrecio)
+                .toList();
+        } else if (minPrecio != null) {
+            productos = productos.stream()
+                .filter(p -> p.getPrecio() >= minPrecio)
+                .toList();
+        } else if (maxPrecio != null) {
+            productos = productos.stream()
+                .filter(p -> p.getPrecio() <= maxPrecio)
+                .toList();
+        }
+        
+        model.addAttribute("productos", productos);
+        model.addAttribute("q", query);
+        model.addAttribute("categoria", categoria);
+        model.addAttribute("minPrecio", minPrecio);
+        model.addAttribute("maxPrecio", maxPrecio);
+        
         return "index";
     }
 

@@ -11,34 +11,34 @@
         <div id="loginbox" class="col-md-6 mt-5">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Accede a tu panel personal</h4>
+                    <h4 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> {{ i18n('auth.login') }}</h4>
                 </div>
                 <div class="card-body">
                     <form id="loginform" method="POST" action="/auth/login-post">
                         <div class="mb-3">
-                            <label for="username" class="form-label">Email</label>
+                            <label for="username" class="form-label">{{ i18n('auth.email') }}</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="login-username" name="username" placeholder="email" required>
+                                <input type="text" class="form-control" id="login-username" name="username" placeholder="{{ i18n('auth.email') }}" required>
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">{{ i18n('auth.password') }}</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="login-password" name="password" placeholder="password" required>
+                                <input type="password" class="form-control" id="login-password" name="password" placeholder="{{ i18n('auth.password') }}" required>
                             </div>
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-success">Entrar</button>
+                            <button type="submit" class="btn btn-success">{{ i18n('auth.login') }}</button>
                         </div>
                         
                         <div class="mt-3 pt-3 border-top">
-                            <p class="text-center">¿Todavía no tienes una cuenta? 
+                            <p class="text-center">
                                 <a href="#" onclick="document.getElementById('loginbox').style.display='none'; document.getElementById('signupbox').style.display='block'; return false;">
-                                    ¡Créala aquí!
+                                    {{ i18n('auth.register') }}
                                 </a>
                             </p>
                         </div>
@@ -51,39 +51,39 @@
         <div id="signupbox" class="col-md-6 mt-5" style="display: none;">
             <div class="card shadow">
                 <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0">Crear una nueva cuenta</h4>
+                    <h4 class="mb-0"><i class="bi bi-person-plus"></i> {{ i18n('auth.register') }}</h4>
                 </div>
                 <div class="card-body">
                     <form id="signupform" method="POST" action="/auth/register" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email" placeholder="Email" required>
+                            <label for="email" class="form-label">{{ i18n('user.email') }}</label>
+                            <input type="email" class="form-control" name="email" placeholder="{{ i18n('user.email') }}" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" name="nombre" placeholder="Nombre" required>
+                            <label for="nombre" class="form-label">{{ i18n('user.name') }}</label>
+                            <input type="text" class="form-control" name="nombre" placeholder="{{ i18n('user.name') }}" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="apellidos" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" name="apellidos" placeholder="Apellidos" required>
+                            <label for="apellidos" class="form-label">{{ i18n('user.surname') }}</label>
+                            <input type="text" class="form-control" name="apellidos" placeholder="{{ i18n('user.surname') }}" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" name="password" placeholder="Password" required>
+                            <label for="password" class="form-label">{{ i18n('user.password') }}</label>
+                            <input type="password" class="form-control" name="password" placeholder="{{ i18n('user.password') }}" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="file" class="form-label">Avatar</label>
-                            <input type="file" class="form-control" name="file" required>
+                            <label for="file" class="form-label">{{ i18n('user.avatar') }}</label>
+                            <input type="file" class="form-control" name="file">
                         </div>
                         
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-info">Continuar</button>
+                            <button type="submit" class="btn btn-info">{{ i18n('auth.register') }}</button>
                             <a href="#" onclick="document.getElementById('signupbox').style.display='none'; document.getElementById('loginbox').style.display='block'; return false;" class="btn btn-secondary">
-                                Volver al login
+                                {{ i18n('btn.cancel') }}
                             </a>
                         </div>
                     </form>

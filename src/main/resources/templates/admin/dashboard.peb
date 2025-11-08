@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+{% include "fragments/head.peb" %}
+<body>
+{% include "fragments/navbar.peb" %}
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-speedometer2"></i> {{ i18n('dashboard.title') }}
+            </h1>
+        </div>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">{{ i18n('dashboard.total.products') }}</h6>
+                            <h2 class="mb-0">{{ totalProductos }}</h2>
+                        </div>
+                        <div>
+                            <i class="bi bi-box-seam" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">{{ i18n('dashboard.total.users') }}</h6>
+                            <h2 class="mb-0">{{ totalUsuarios }}</h2>
+                        </div>
+                        <div>
+                            <i class="bi bi-people" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">{{ i18n('dashboard.total.purchases') }}</h6>
+                            <h2 class="mb-0">{{ totalCompras }}</h2>
+                        </div>
+                        <div>
+                            <i class="bi bi-receipt" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-bar-chart"></i> {{ i18n('dashboard.statistics') }}</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-pie-chart"></i> Distribución</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Recientes -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clock-history"></i> {{ i18n('dashboard.recent.products') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>{{ i18n('product.name') }}</th>
+                                    <th>{{ i18n('product.price') }}</th>
+                                    <th>{{ i18n('product.category') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for producto in productosRecientes %}
+                                <tr>
+                                    <td>{{ producto.id }}</td>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>{{ producto.precio }}€</td>
+                                    <td>{{ producto.categoria }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios Recientes -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-plus"></i> {{ i18n('dashboard.recent.users') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>{{ i18n('user.name') }}</th>
+                                    <th>{{ i18n('user.email') }}</th>
+                                    <th>{{ i18n('user.role') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuariosRecientes %}
+                                <tr>
+                                    <td>{{ usuario.id }}</td>
+                                    <td>{{ usuario.nombre }} {{ usuario.apellidos }}</td>
+                                    <td>{{ usuario.email }}</td>
+                                    <td><span class="badge bg-info">{{ usuario.rol }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer.peb" %}
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Estadísticas generales
+    const ctx1 = document.getElementById('statsChart');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['{{ i18n('dashboard.total.products') }}', '{{ i18n('dashboard.total.users') }}', '{{ i18n('dashboard.total.purchases') }}'],
+            datasets: [{
+                label: '{{ i18n('dashboard.statistics') }}',
+                data: [{{ totalProductos }}, {{ totalUsuarios }}, {{ totalCompras }}],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(255, 206, 86, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Gráfico circular
+    const ctx2 = document.getElementById('pieChart');
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: ['Productos', 'Usuarios', 'Compras'],
+            datasets: [{
+                data: [{{ totalProductos }}, {{ totalUsuarios }}, {{ totalCompras }}],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 206, 86, 0.7)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
