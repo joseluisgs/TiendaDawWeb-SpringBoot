@@ -32,17 +32,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
     
     // Pebble Template Engine
-    implementation("io.pebbletemplates:pebble-spring-boot-starter:3.2.2")
-    implementation("io.pebbletemplates:pebble:3.2.2")
+    implementation("io.pebbletemplates:pebble-spring-boot-starter:3.2.4")
+    implementation("io.pebbletemplates:pebble:3.2.4")
     
     // H2 Database
     runtimeOnly("com.h2database:h2")
     
     // Spring Boot DevTools
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    // developmentOnly("org.springframework.boot:spring-boot-devtools")
     
     // PDF Generation
-    implementation("com.lowagie:itext:4.2.2")
+    implementation("com.itextpdf:itextpdf:5.5.13.4")
     implementation("com.itextpdf:html2pdf:5.0.5")
     
     // Image processing
