@@ -215,12 +215,13 @@ Accede a la consola de base de datos en modo desarrollo:
 
 ### Tutoriales Incluidos
 
-- **[SpringMVC.md](SpringMVC.md)**: Tutorial completo de Spring MVC para aplicaciones web dinámicas
-- **[Pebble.md](Pebble.md)**: Guía exhaustiva del motor de plantillas Pebble
+- **[SpringMVC.md](SpringMVC.md)**: Tutorial completo de Spring MVC con ejemplos de sesiones HTTP, Model vs ModelAndView, y casos prácticos paso a paso
+- **[Pebble.md](Pebble.md)**: Guía exhaustiva del motor de plantillas Pebble con integración de datos de sesión y ejemplos avanzados
+- **[SECURITY.md](SECURITY.md)**: Resumen completo de seguridad del proyecto en español
 
-### Perfiles de Aplicación
+### Configuración de Perfiles
 
-La aplicación soporta dos perfiles:
+La aplicación soporta dos perfiles claramente diferenciados para desarrollo y producción:
 
 #### Perfil DEV (Desarrollo)
 
@@ -228,11 +229,20 @@ La aplicación soporta dos perfiles:
 spring.profiles.active=dev
 ```
 
-- ✅ Logging detallado (DEBUG)
-- ✅ Caché deshabilitado para hot-reload
-- ✅ Consola H2 habilitada
-- ✅ Directorio de uploads limpiado al iniciar
-- ✅ SQL queries visibles
+**Configuración:**
+- 💾 **Base de datos**: H2 en memoria para desarrollo rápido
+- 🔄 **Datos de prueba**: Se cargan automáticamente al iniciar (usuarios, productos)
+- 🗑️ **Storage**: El directorio de uploads se **limpia al iniciar** la aplicación
+- 🐛 **Logging**: Nivel DEBUG para depuración detallada
+- ⚡ **Caché**: Deshabilitado para hot-reload
+- 🔧 **Consola H2**: Habilitada en http://localhost:8080/h2-console
+- 📝 **SQL Queries**: Visibles en la consola
+
+**Ideal para:**
+- Desarrollo local
+- Pruebas unitarias y de integración
+- Aprendizaje y experimentación
+- No requiere configuración adicional
 
 #### Perfil PROD (Producción)
 
@@ -240,11 +250,20 @@ spring.profiles.active=dev
 spring.profiles.active=prod
 ```
 
-- ✅ Logging optimizado (WARN)
-- ✅ Caché habilitado
-- ✅ Consola H2 deshabilitada
-- ✅ Directorio de uploads persistente
-- ✅ SQL queries ocultas
+**Configuración:**
+- 💾 **Base de datos**: H2 en fichero (`walaspringboot.mv.db`) para persistencia real
+- 🚫 **Datos de prueba**: **NO se cargan** automáticamente
+- 📁 **Storage**: El directorio de uploads **NO se borra**, mantiene los archivos
+- 📊 **Logging**: Nivel WARN optimizado para producción
+- ⚡ **Caché**: Habilitado para mejor rendimiento
+- 🔒 **Consola H2**: Deshabilitada por seguridad
+- 📝 **SQL Queries**: Ocultas
+
+**Ideal para:**
+- Despliegue en servidor
+- Datos reales que deben persistir
+- Mejor rendimiento
+- Mayor seguridad
 
 ## 🏗️ Arquitectura
 
@@ -316,38 +335,55 @@ Además implementa:
 - **Service Layer**: Para lógica de negocio
 - **Dependency Injection**: Con Spring IoC
 
-## 📝 Migración desde WalaSpringBoot2020
+## 🎯 Casos de Uso Principales
 
-### Cambios Principales
+### Para Estudiantes de DAW
 
-| Aspecto | 2020 | 2025 |
-|---------|------|------|
-| **Build System** | Maven | Gradle + Kotlin DSL |
-| **Java** | 8 | 21 (LTS) |
-| **Spring Boot** | 2.2.2 | 3.4.0 |
-| **Template Engine** | Thymeleaf | Pebble 3.2.2 |
-| **Bootstrap** | 3.3.7 (WebJars) | 5.3 (CDN) |
-| **Security** | WebSecurityConfigurerAdapter | SecurityFilterChain |
-| **Jakarta** | javax.* | jakarta.* |
-| **Internationalization** | No | Sí (ES/EN) |
-| **Roles** | No | Sí (ADMIN/USER/MODERATOR) |
-| **Email** | No | Sí (confirmaciones) |
-| **Admin Dashboard** | No | Sí (con gráficos) |
-| **Cache** | No | Sí (@Cacheable) |
-| **Image Processing** | No | Sí (redimensionado) |
+Esta aplicación está diseñada específicamente para estudiantes de **Desarrollo de Aplicaciones Web** que están aprendiendo Spring Boot. Incluye ejemplos prácticos de:
 
-### Mejoras Implementadas 2025
+1. **🛒 E-commerce Completo**: Aprende a crear un marketplace de productos de segunda mano desde cero
+   - Listado y búsqueda de productos
+   - Carrito de compras con sesiones HTTP
+   - Sistema de compra y confirmación por email
+   - Gestión de productos propios
 
-1. ✅ **Localización i18n**: Soporte multiidioma completo
-2. ✅ **Gestión automática de directorios**: Por perfil (dev/prod)
-3. ✅ **Productos actualizados 2024-2025**: Tecnología actual
-4. ✅ **Sistema de roles y permisos**: RBAC con Spring Security
-5. ✅ **Gestión de imágenes**: Validación y redimensionado
-6. ✅ **Búsqueda y filtros**: Por nombre, categoría, precio
-7. ✅ **Dashboard administrativo**: Estadísticas y gráficos Chart.js
-8. ✅ **Validación avanzada**: Custom validators y mensajes localizados
-9. ✅ **Logging enriquecido**: Perfiles dev/prod diferenciados
-10. ✅ **Email de confirmación**: Solo para compras realizadas
+2. **🔐 Autenticación y Autorización**: Implementa seguridad real con Spring Security 6
+   - Sistema de login/registro
+   - Control de acceso basado en roles (ADMIN, MODERATOR, USER)
+   - Protección de endpoints y vistas
+
+3. **📊 Dashboard Administrativo**: Crea paneles de control con estadísticas
+   - Gráficos interactivos con Chart.js
+   - Gestión de usuarios y productos
+   - Visualización de métricas del sistema
+
+4. **🌍 Internacionalización**: Desarrolla aplicaciones multiidioma
+   - Soporte español e inglés
+   - Cambio dinámico de idioma
+   - Mensajes localizados
+
+5. **🖼️ Gestión de Archivos**: Maneja subida y procesamiento de imágenes
+   - Validación de archivos
+   - Redimensionado automático
+   - Almacenamiento seguro
+
+6. **📧 Notificaciones por Email**: Envía emails automáticos
+   - Confirmación de compras
+   - Plantillas HTML profesionales
+   - Integración con servicios SMTP
+
+### Características Técnicas Implementadas
+
+1. ✅ **Arquitectura MVC completa**: Separación clara de responsabilidades
+2. ✅ **Gestión de sesiones HTTP**: Carrito de compras persistente
+3. ✅ **Motor de plantillas Pebble**: Vistas dinámicas y rápidas
+4. ✅ **Spring Data JPA**: Persistencia de datos con Hibernate
+5. ✅ **Validación de formularios**: Bean Validation y validadores personalizados
+6. ✅ **Sistema de cache**: Mejora del rendimiento con @Cacheable
+7. ✅ **Logging configurado**: Diferentes niveles según el entorno
+8. ✅ **Perfiles de configuración**: Separación dev/prod
+9. ✅ **Bootstrap 5**: Diseño responsive y moderno
+10. ✅ **Base de datos H2**: Fácil desarrollo y pruebas
 
 ## 🤝 Contribución
 
@@ -365,23 +401,38 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 👨‍💻 Autor
 
-**José Luis González Sánchez**
+Codificado con :sparkling_heart: por:
 
+[![José Luis González Sánchez](https://img.shields.io/badge/GitHub-joseluisgs-blue?style=flat&logo=github)](https://github.com/joseluisgs)
+[![Twitter](https://img.shields.io/badge/Twitter-@joseluisgonsan-blue?style=flat&logo=twitter)](https://twitter.com/joseluisgonsan)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-José%20Luis%20González-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/joseluisgonsan/)
+
+### Contacto
+
+- 📧 Email: joseluis.gonzalez@cifpvirgendegracia.com
+- 💼 GitHub: [@joseluisgs](https://github.com/joseluisgs)
 - 🐦 Twitter: [@joseluisgonsan](https://twitter.com/joseluisgonsan)
 - 💼 LinkedIn: [joseluisgonsan](https://www.linkedin.com/in/joseluisgonsan/)
-- 🏫 Centro: [CIFP Virgen de Gracia](http://www.cifpvirgendegracia.com/)
-- 📧 Email: joseluis.gonzalez@cifpvirgendegracia.com
+
+### Licencia
+
+Este proyecto está licenciado bajo la licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+<img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+</a><br />
+Esta obra está bajo una <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional</a>.
 
 ## 🙏 Agradecimientos
 
-- Al [CIFP Virgen de Gracia](http://www.cifpvirgendegracia.com/) por el apoyo educativo
 - A la comunidad de Spring Boot por la excelente documentación
 - Al equipo de Pebble Template Engine por su motor eficiente
+- A todos los estudiantes que usan este proyecto para aprender
 
 ---
 
 **Versión:** 2.0 (2025)  
-**Migrado desde:** [WalaSpringBoot2020](https://github.com/joseluisgs/WalaSpringBoot2020)  
+**Proyecto educativo para estudiantes de DAW**  
 **Última actualización:** Enero 2025
 
-⭐ Si te ha gustado este proyecto, ¡dale una estrella en GitHub!
+⭐ Si te ha ayudado este proyecto para aprender, ¡dale una estrella en GitHub!

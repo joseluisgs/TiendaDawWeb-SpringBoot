@@ -1,18 +1,18 @@
-# 🔒 Security Summary - WalaSpringBoot 2025
+# 🔒 Resumen de Seguridad - WalaSpringBoot 2025
 
-## Security Scan Results
+## Resultados del Escaneo de Seguridad
 
-### CodeQL Analysis
-- **Status:** ✅ PASSED
-- **Alerts Found:** 0
-- **Scan Date:** January 2025
-- **Language:** Java
+### Análisis CodeQL
+- **Estado:** ✅ APROBADO
+- **Alertas Encontradas:** 0
+- **Fecha de Escaneo:** Enero 2025
+- **Lenguaje:** Java
 
-## Security Features Implemented
+## Características de Seguridad Implementadas
 
-### 1. Authentication & Authorization
+### 1. Autenticación y Autorización
 
-#### Spring Security 6 Configuration
+#### Configuración de Spring Security 6
 ```java
 @Configuration
 @EnableWebSecurity
@@ -20,22 +20,22 @@
 public class SeguridadConfig
 ```
 
-**Features:**
-- ✅ Modern `SecurityFilterChain` (not deprecated WebSecurityConfigurerAdapter)
-- ✅ BCrypt password encoding for secure password storage
-- ✅ Form-based authentication with custom login page
-- ✅ CSRF protection enabled (excluding H2 console)
-- ✅ Session management configured
-- ✅ Frame options for H2 console (same-origin only)
+**Características:**
+- ✅ `SecurityFilterChain` moderno (no el obsoleto WebSecurityConfigurerAdapter)
+- ✅ Codificación de contraseñas con BCrypt para almacenamiento seguro
+- ✅ Autenticación basada en formularios con página de login personalizada
+- ✅ Protección CSRF activada (excluyendo consola H2)
+- ✅ Gestión de sesiones configurada
+- ✅ Opciones de marco para consola H2 (solo mismo origen)
 
-#### Role-Based Access Control (RBAC)
+#### Control de Acceso Basado en Roles (RBAC)
 
 **Roles:**
-- `ADMIN` - Full system access
-- `MODERATOR` - Content moderation access
-- `USER` - Standard user access
+- `ADMIN` - Acceso completo al sistema
+- `MODERATOR` - Acceso de moderación de contenido
+- `USER` - Acceso de usuario estándar
 
-**Implementation:**
+**Implementación:**
 ```java
 .authorizeHttpRequests(auth -> auth
     .requestMatchers("/", "/public/**", "/css/**").permitAll()
@@ -45,16 +45,16 @@ public class SeguridadConfig
 )
 ```
 
-**Method-Level Security:**
+**Seguridad a Nivel de Método:**
 ```java
 @PreAuthorize("hasAuthority('ADMIN')")
 @GetMapping("/admin/dashboard")
 public String dashboard(Model model)
 ```
 
-### 2. Input Validation
+### 2. Validación de Entrada
 
-#### Bean Validation (Jakarta)
+#### Validación Bean (Jakarta)
 ```java
 @NotEmpty(message = "{usuario.nombre.vacio}")
 private String nombre;
@@ -66,34 +66,34 @@ private String email;
 private float precio;
 ```
 
-#### Custom Validators
+#### Validadores Personalizados
 ```java
 @ValidImage
 private MultipartFile file;
 ```
 
 **ValidImageValidator:**
-- ✅ Validates file format (JPEG, PNG, GIF only)
-- ✅ Validates file size (max 5MB)
-- ✅ Prevents malicious file uploads
+- ✅ Valida el formato de archivo (solo JPEG, PNG, GIF)
+- ✅ Valida el tamaño del archivo (máximo 5MB)
+- ✅ Previene cargas de archivos maliciosos
 
-### 3. XSS Protection
+### 3. Protección XSS
 
-#### Template Auto-Escaping (Pebble)
+#### Auto-Escapado de Plantillas (Pebble)
 ```pebble
-{# Automatically escaped - Safe from XSS #}
+{# Escapado automáticamente - Seguro contra XSS #}
 {{ usuario.comentario }}
 
-{# Only use raw when content is trusted #}
+{# Solo usar raw cuando el contenido sea confiable #}
 {{ htmlSeguro | raw }}
 ```
 
-**Protection:**
-- ✅ All user input is automatically HTML-escaped
-- ✅ Prevents injection of malicious scripts
-- ✅ Raw filter only used for trusted admin content
+**Protección:**
+- ✅ Toda la entrada del usuario se escapa automáticamente en HTML
+- ✅ Previene la inyección de scripts maliciosos
+- ✅ El filtro raw solo se usa para contenido de administrador confiable
 
-### 4. SQL Injection Prevention
+### 4. Prevención de Inyección SQL
 
 #### Spring Data JPA
 ```java
@@ -102,14 +102,14 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 }
 ```
 
-**Protection:**
-- ✅ Parameterized queries via JPA
-- ✅ No raw SQL queries
-- ✅ Safe query methods from Spring Data
+**Protección:**
+- ✅ Consultas parametrizadas vía JPA
+- ✅ Sin consultas SQL en crudo
+- ✅ Métodos de consulta seguros de Spring Data
 
-### 5. File Upload Security
+### 5. Seguridad en Carga de Archivos
 
-#### Image Service
+#### Servicio de Imágenes
 ```java
 @Service
 public class ImageService {
@@ -120,13 +120,13 @@ public class ImageService {
 }
 ```
 
-**Protection:**
-- ✅ File type validation (images only)
-- ✅ File size validation (max 5MB)
-- ✅ Automatic image resizing to prevent DoS
-- ✅ Unique filename generation to prevent overwrites
+**Protección:**
+- ✅ Validación de tipo de archivo (solo imágenes)
+- ✅ Validación de tamaño de archivo (máximo 5MB)
+- ✅ Redimensionado automático de imágenes para prevenir DoS
+- ✅ Generación de nombres de archivo únicos para prevenir sobrescrituras
 
-### 6. CSRF Protection
+### 6. Protección CSRF
 
 ```java
 .csrf(csrf -> csrf
@@ -134,12 +134,12 @@ public class ImageService {
 )
 ```
 
-**Protection:**
-- ✅ CSRF tokens in all POST/PUT/DELETE forms
-- ✅ Automatic validation by Spring Security
-- ✅ Only disabled for H2 console (dev environment)
+**Protección:**
+- ✅ Tokens CSRF en todos los formularios POST/PUT/DELETE
+- ✅ Validación automática por Spring Security
+- ✅ Solo deshabilitado para la consola H2 (entorno de desarrollo)
 
-### 7. Password Security
+### 7. Seguridad de Contraseñas
 
 #### BCryptPasswordEncoder
 ```java
@@ -149,13 +149,13 @@ public BCryptPasswordEncoder passwordEncoder() {
 }
 ```
 
-**Protection:**
-- ✅ Strong password hashing with BCrypt
-- ✅ Salt automatically generated per password
-- ✅ Configurable strength (default: 10 rounds)
-- ✅ Passwords never stored in plain text
+**Protección:**
+- ✅ Hash fuerte de contraseñas con BCrypt
+- ✅ Salt generado automáticamente por contraseña
+- ✅ Fuerza configurable (por defecto: 10 rondas)
+- ✅ Las contraseñas nunca se almacenan en texto plano
 
-### 8. Session Management
+### 8. Gestión de Sesiones
 
 ```java
 .formLogin(form -> form
@@ -170,15 +170,15 @@ public BCryptPasswordEncoder passwordEncoder() {
 )
 ```
 
-**Protection:**
-- ✅ Secure session handling
-- ✅ Session invalidation on logout
-- ✅ HttpOnly cookies
-- ✅ Secure flag in production (HTTPS)
+**Protección:**
+- ✅ Manejo seguro de sesiones
+- ✅ Invalidación de sesión al cerrar sesión
+- ✅ Cookies HttpOnly
+- ✅ Flag Secure en producción (HTTPS)
 
-### 9. Email Security
+### 9. Seguridad de Email
 
-#### Email Service
+#### Servicio de Email
 ```java
 @Service
 public class EmailService {
@@ -189,44 +189,44 @@ public class EmailService {
 }
 ```
 
-**Protection:**
-- ✅ Email credentials not in code
-- ✅ HTML email sanitization
-- ✅ TLS encryption for SMTP
-- ✅ Rate limiting possible via SMTP server
+**Protección:**
+- ✅ Credenciales de email no en el código
+- ✅ Sanitización de emails HTML
+- ✅ Cifrado TLS para SMTP
+- ✅ Limitación de tasa posible vía servidor SMTP
 
-### 10. Database Security
+### 10. Seguridad de Base de Datos
 
-#### H2 Console (Development Only)
+#### Consola H2 (Solo Desarrollo)
 ```properties
 # application-prod.properties
 spring.h2.console.enabled=false
 ```
 
-**Protection:**
-- ✅ H2 console disabled in production
-- ✅ Frame options restricted to same-origin
-- ✅ Database credentials configurable
-- ✅ Database file excluded from git (.gitignore)
+**Protección:**
+- ✅ Consola H2 deshabilitada en producción
+- ✅ Opciones de marco restringidas a mismo origen
+- ✅ Credenciales de base de datos configurables
+- ✅ Archivo de base de datos excluido de git (.gitignore)
 
-## Security Best Practices Followed
+## Mejores Prácticas de Seguridad Seguidas
 
-### 1. Principle of Least Privilege
-- ✅ Each role has minimum necessary permissions
-- ✅ Public endpoints explicitly whitelisted
-- ✅ Default deny for authenticated areas
+### 1. Principio de Mínimo Privilegio
+- ✅ Cada rol tiene los permisos mínimos necesarios
+- ✅ Endpoints públicos explícitamente en lista blanca
+- ✅ Denegación por defecto para áreas autenticadas
 
-### 2. Defense in Depth
-- ✅ Multiple layers of security (authentication, authorization, validation)
-- ✅ Input validation at controller and entity level
-- ✅ Output encoding in templates
+### 2. Defensa en Profundidad
+- ✅ Múltiples capas de seguridad (autenticación, autorización, validación)
+- ✅ Validación de entrada a nivel de controlador y entidad
+- ✅ Codificación de salida en plantillas
 
-### 3. Secure Configuration
-- ✅ Development vs production profiles
-- ✅ Sensitive data in properties files (not code)
-- ✅ Debug features disabled in production
+### 3. Configuración Segura
+- ✅ Perfiles de desarrollo vs producción
+- ✅ Datos sensibles en archivos de propiedades (no en código)
+- ✅ Características de depuración deshabilitadas en producción
 
-### 4. Logging & Monitoring
+### 4. Registro y Monitoreo
 ```properties
 # application-dev.properties
 logging.level.org.springframework.security=DEBUG
@@ -235,12 +235,12 @@ logging.level.org.springframework.security=DEBUG
 logging.level.org.springframework.security=WARN
 ```
 
-**Benefits:**
-- ✅ Security events logged
-- ✅ Different verbosity per environment
-- ✅ Audit trail for authentication
+**Beneficios:**
+- ✅ Eventos de seguridad registrados
+- ✅ Diferente nivel de detalle por entorno
+- ✅ Pista de auditoría para autenticación
 
-### 5. Dependency Management
+### 5. Gestión de Dependencias
 ```kotlin
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -248,41 +248,41 @@ dependencies {
 }
 ```
 
-**Benefits:**
-- ✅ Latest stable Spring Security version
-- ✅ Regular security updates via dependency management
-- ✅ No known vulnerable dependencies (CodeQL verified)
+**Beneficios:**
+- ✅ Última versión estable de Spring Security
+- ✅ Actualizaciones de seguridad regulares vía gestión de dependencias
+- ✅ Sin dependencias vulnerables conocidas (verificado por CodeQL)
 
-## Known Limitations
+## Limitaciones Conocidas
 
-### Development Environment
-- ⚠️ H2 console exposed (disabled in production)
-- ⚠️ Debug logging enabled (disabled in production)
-- ⚠️ CSRF relaxed for H2 console
+### Entorno de Desarrollo
+- ⚠️ Consola H2 expuesta (deshabilitada en producción)
+- ⚠️ Registro de depuración habilitado (deshabilitado en producción)
+- ⚠️ CSRF relajado para consola H2
 
-**Mitigation:**
-- Only use development profile in local environment
-- Never deploy with `spring.profiles.active=dev`
+**Mitigación:**
+- Solo usar perfil de desarrollo en entorno local
+- Nunca desplegar con `spring.profiles.active=dev`
 
-### Email Service
-- ⚠️ SMTP credentials in properties file
-- ⚠️ No rate limiting implemented
+### Servicio de Email
+- ⚠️ Credenciales SMTP en archivo de propiedades
+- ⚠️ Sin limitación de tasa implementada
 
-**Mitigation:**
-- Use environment variables for SMTP credentials
-- Configure external SMTP service with rate limiting
+**Mitigación:**
+- Usar variables de entorno para credenciales SMTP
+- Configurar servicio SMTP externo con limitación de tasa
 
-### File Upload
-- ⚠️ Local file system storage
-- ⚠️ No CDN integration
+### Carga de Archivos
+- ⚠️ Almacenamiento en sistema de archivos local
+- ⚠️ Sin integración con CDN
 
-**Mitigation:**
-- Production deployment should use cloud storage (S3, Azure Blob)
-- Current implementation suitable for small-scale deployments
+**Mitigación:**
+- El despliegue en producción debería usar almacenamiento en la nube (S3, Azure Blob)
+- La implementación actual es adecuada para despliegues de pequeña escala
 
-## Security Recommendations for Production
+## Recomendaciones de Seguridad para Producción
 
-### 1. HTTPS Configuration
+### 1. Configuración HTTPS
 ```properties
 server.ssl.enabled=true
 server.ssl.key-store=classpath:keystore.p12
@@ -290,21 +290,21 @@ server.ssl.key-store-password=${SSL_PASSWORD}
 server.ssl.key-store-type=PKCS12
 ```
 
-### 2. Environment Variables
+### 2. Variables de Entorno
 ```bash
-export DB_PASSWORD=secure-password
-export SMTP_PASSWORD=secure-smtp-password
-export JWT_SECRET=secure-jwt-secret
+export DB_PASSWORD=contraseña-segura
+export SMTP_PASSWORD=contraseña-smtp-segura
+export JWT_SECRET=secreto-jwt-seguro
 ```
 
-### 3. Rate Limiting
-Consider adding:
-- Login attempt limiting
-- API rate limiting
-- File upload rate limiting
+### 3. Limitación de Tasa
+Considerar añadir:
+- Limitación de intentos de inicio de sesión
+- Limitación de tasa de API
+- Limitación de tasa de carga de archivos
 
-### 4. Security Headers
-Add security headers configuration:
+### 4. Encabezados de Seguridad
+Añadir configuración de encabezados de seguridad:
 ```java
 http.headers(headers -> headers
     .contentSecurityPolicy("default-src 'self'")
@@ -314,49 +314,49 @@ http.headers(headers -> headers
 );
 ```
 
-### 5. Regular Updates
-- ✅ Keep Spring Boot updated
-- ✅ Monitor security advisories
-- ✅ Update dependencies regularly
-- ✅ Run security scans periodically
+### 5. Actualizaciones Regulares
+- ✅ Mantener Spring Boot actualizado
+- ✅ Monitorear avisos de seguridad
+- ✅ Actualizar dependencias regularmente
+- ✅ Ejecutar escaneos de seguridad periódicamente
 
-## Compliance
+## Cumplimiento Normativo
 
 ### OWASP Top 10 (2021)
 
-| Risk | Status | Mitigation |
-|------|--------|-----------|
-| A01:2021 - Broken Access Control | ✅ Mitigated | Role-based access control |
-| A02:2021 - Cryptographic Failures | ✅ Mitigated | BCrypt password hashing |
-| A03:2021 - Injection | ✅ Mitigated | JPA parameterized queries |
-| A04:2021 - Insecure Design | ✅ Mitigated | Security by design |
-| A05:2021 - Security Misconfiguration | ✅ Mitigated | Profile-based config |
-| A06:2021 - Vulnerable Components | ✅ Mitigated | Latest stable versions |
-| A07:2021 - Authentication Failures | ✅ Mitigated | Spring Security 6 |
-| A08:2021 - Data Integrity Failures | ✅ Mitigated | Input validation |
-| A09:2021 - Logging Failures | ✅ Mitigated | SLF4J logging |
-| A10:2021 - SSRF | ✅ Mitigated | No external requests |
+| Riesgo | Estado | Mitigación |
+|--------|--------|------------|
+| A01:2021 - Control de Acceso Roto | ✅ Mitigado | Control de acceso basado en roles |
+| A02:2021 - Fallos Criptográficos | ✅ Mitigado | Hash de contraseñas con BCrypt |
+| A03:2021 - Inyección | ✅ Mitigado | Consultas parametrizadas JPA |
+| A04:2021 - Diseño Inseguro | ✅ Mitigado | Seguridad por diseño |
+| A05:2021 - Configuración Incorrecta de Seguridad | ✅ Mitigado | Configuración basada en perfiles |
+| A06:2021 - Componentes Vulnerables | ✅ Mitigado | Últimas versiones estables |
+| A07:2021 - Fallos de Autenticación | ✅ Mitigado | Spring Security 6 |
+| A08:2021 - Fallos de Integridad de Datos | ✅ Mitigado | Validación de entrada |
+| A09:2021 - Fallos de Registro | ✅ Mitigado | Registro con SLF4J |
+| A10:2021 - SSRF | ✅ Mitigado | Sin peticiones externas |
 
-## Security Contact
+## Contacto de Seguridad
 
-For security issues, please contact:
+Para problemas de seguridad, por favor contactar:
 - **Email:** joseluis.gonzalez@cifpvirgendegracia.com
-- **Report:** Open a security advisory in GitHub
+- **Reporte:** Abrir un aviso de seguridad en GitHub
 
-**Do not open public issues for security vulnerabilities.**
-
----
-
-## Audit Log
-
-| Date | Scan Type | Result | Notes |
-|------|-----------|--------|-------|
-| Jan 2025 | CodeQL | ✅ 0 alerts | Initial security scan |
-| Jan 2025 | Manual Review | ✅ Passed | Code review completed |
-| Jan 2025 | Dependency Check | ✅ No vulnerabilities | All dependencies up-to-date |
+**No abrir issues públicos para vulnerabilidades de seguridad.**
 
 ---
 
-**Last Updated:** January 2025  
-**Security Level:** Production Ready with Recommendations  
-**Audit Status:** ✅ PASSED
+## Registro de Auditoría
+
+| Fecha | Tipo de Escaneo | Resultado | Notas |
+|-------|-----------------|-----------|-------|
+| Ene 2025 | CodeQL | ✅ 0 alertas | Escaneo de seguridad inicial |
+| Ene 2025 | Revisión Manual | ✅ Aprobado | Revisión de código completada |
+| Ene 2025 | Verificación de Dependencias | ✅ Sin vulnerabilidades | Todas las dependencias actualizadas |
+
+---
+
+**Última Actualización:** Enero 2025  
+**Nivel de Seguridad:** Listo para Producción con Recomendaciones  
+**Estado de Auditoría:** ✅ APROBADO

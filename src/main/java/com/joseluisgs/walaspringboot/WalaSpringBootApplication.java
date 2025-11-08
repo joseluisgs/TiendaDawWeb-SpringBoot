@@ -25,9 +25,16 @@ public class WalaSpringBootApplication {
         SpringApplication.run(WalaSpringBootApplication.class, args);
     }
 
+    /**
+     * Inicializa datos de prueba SOLO en perfil de desarrollo
+     * En producción (perfil prod) este bean no se crea
+     */
     @Bean
+    @org.springframework.context.annotation.Profile("dev")
     public CommandLineRunner initData(UsuarioServicio usuarioServicio, ProductoServicio productoServicio) {
         return args -> {
+            System.out.println("🔧 PERFIL DEV: Cargando datos de prueba...");
+            
             // Crear usuarios con diferentes roles
             Usuario admin = new Usuario("Admin", "Administrador", null, "admin@walaspringboot.com", "admin", "ADMIN");
             admin = usuarioServicio.registrar(admin);
@@ -40,6 +47,8 @@ public class WalaSpringBootApplication {
 
             Usuario usuario2 = new Usuario("Otro", "Usuario", null, "otro@otro.com", "otro", "USER");
             usuario2 = usuarioServicio.registrar(usuario2);
+
+            System.out.println("✅ Usuarios de prueba creados: admin, prueba, moderador, otro");
 
             // Productos actualizados 2024-2025
             List<Producto> listado = Arrays.asList(
@@ -70,6 +79,9 @@ public class WalaSpringBootApplication {
             );
 
             listado.forEach(productoServicio::insertar);
+            
+            System.out.println("✅ " + listado.size() + " productos de prueba creados");
+            System.out.println("🔧 Datos de prueba cargados correctamente");
         };
     }
 }

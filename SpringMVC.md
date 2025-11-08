@@ -255,20 +255,55 @@ public Producto crearApi(@RequestBody Producto producto) {
 }
 ```
 
-### Model y ModelAndView
+### Model y ModelAndView - Diferencias y Cuándo Usar Cada Uno
 
-#### Usando Model
+Ambos `Model` y `ModelAndView` sirven para pasar datos del controller a la vista, pero tienen diferencias importantes:
+
+#### Model - Enfoque Moderno y Flexible
+
+**Características:**
+- ✅ Interfaz más simple y ligera
+- ✅ El nombre de la vista se devuelve como String
+- ✅ Permite múltiples return según lógica
+- ✅ Más fácil de leer y mantener
+
+**Ejemplo básico:**
 
 ```java
 @GetMapping("/productos")
 public String lista(Model model) {
     model.addAttribute("productos", productoServicio.findAll());
     model.addAttribute("titulo", "Lista de Productos");
-    return "productos/lista";
+    return "productos/lista"; // Nombre de la vista como String
 }
 ```
 
-#### Usando ModelAndView
+**Con lógica condicional:**
+
+```java
+@GetMapping("/productos/{id}")
+public String detalle(@PathVariable Long id, Model model) {
+    Producto producto = productoServicio.findById(id);
+    
+    if (producto == null) {
+        model.addAttribute("error", "Producto no encontrado");
+        return "error/404"; // Fácil retornar diferentes vistas
+    }
+    
+    model.addAttribute("producto", producto);
+    return "productos/detalle";
+}
+```
+
+#### ModelAndView - Enfoque Clásico Todo-en-Uno
+
+**Características:**
+- ✅ Encapsula vista y modelo en un solo objeto
+- ✅ Útil cuando se necesita más control sobre la respuesta
+- ✅ Permite configurar códigos de estado HTTP
+- ✅ Histórico de Spring MVC (anterior a Spring 3.0)
+
+**Ejemplo básico:**
 
 ```java
 @GetMapping("/productos")
@@ -276,9 +311,160 @@ public ModelAndView lista() {
     ModelAndView mav = new ModelAndView("productos/lista");
     mav.addObject("productos", productoServicio.findAll());
     mav.addObject("titulo", "Lista de Productos");
+    return mav; // Devuelve el objeto ModelAndView completo
+}
+```
+
+**Con redirección:**
+
+```java
+@PostMapping("/producto/guardar")
+public ModelAndView guardar(@ModelAttribute Producto producto) {
+    productoServicio.insertar(producto);
+    
+    // Redirección con ModelAndView
+    ModelAndView mav = new ModelAndView("redirect:/productos");
     return mav;
 }
 ```
+
+**Con código de estado:**
+
+```java
+@GetMapping("/admin/estadisticas")
+public ModelAndView estadisticas(Principal principal) {
+    if (principal == null) {
+        // Retornar con código 403 Forbidden
+        ModelAndView mav = new ModelAndView("error/403");
+        mav.setStatus(HttpStatus.FORBIDDEN);
+        return mav;
+    }
+    
+    ModelAndView mav = new ModelAndView("admin/estadisticas");
+    mav.addObject("datos", estadisticasServicio.obtener());
+    return mav;
+}
+```
+
+#### Comparación Práctica
+
+| Aspecto | Model | ModelAndView |
+|---------|-------|--------------|
+| **Sintaxis** | `model.addAttribute()` | `mav.addObject()` |
+| **Retorno de vista** | String separado | Incluido en objeto |
+| **Flexibilidad** | ✅ Alta | ⚙️ Media |
+| **Legibilidad** | ✅ Mejor | ⚙️ Aceptable |
+| **Caso de uso típico** | Mayoría de casos | Control avanzado |
+| **Recomendación** | **Usar por defecto** | Solo casos especiales |
+
+#### ¿Cuándo Usar Cada Uno?
+
+**Usa Model cuando:**
+- ✅ Desarrolles código nuevo (práctica moderna)
+- ✅ Tengas lógica condicional con múltiples returns
+- ✅ Quieras código más limpio y legible
+- ✅ Trabajes con formularios simples
+
+**Usa ModelAndView cuando:**
+- ⚙️ Necesites configurar códigos de estado HTTP específicos
+- ⚙️ Trabajes con código legacy que ya lo usa
+- ⚙️ Necesites más control sobre la respuesta HTTP
+- ⚙️ Manejes casos de error complejos
+
+#### Ejemplo Completo Comparativo
+
+**Con Model (Recomendado):**
+
+```java
+@Controller
+@RequestMapping("/productos")
+public class ProductoController {
+    
+    @Autowired
+    private ProductoServicio productoServicio;
+    
+    @GetMapping
+    public String listar(
+        @RequestParam(required = false) String busqueda,
+        Model model
+    ) {
+        List<Producto> productos;
+        
+        if (busqueda != null && !busqueda.isEmpty()) {
+            productos = productoServicio.buscar(busqueda);
+            model.addAttribute("busqueda", busqueda);
+        } else {
+            productos = productoServicio.findAll();
+        }
+        
+        model.addAttribute("productos", productos);
+        model.addAttribute("total", productos.size());
+        return "productos/lista";
+    }
+    
+    @GetMapping("/{id}")
+    public String detalle(@PathVariable Long id, Model model) {
+        Producto producto = productoServicio.findById(id);
+        
+        if (producto == null) {
+            return "redirect:/productos?error=notfound";
+        }
+        
+        model.addAttribute("producto", producto);
+        model.addAttribute("relacionados", 
+            productoServicio.findByCategoria(producto.getCategoria()));
+        return "productos/detalle";
+    }
+}
+```
+
+**Con ModelAndView:**
+
+```java
+@Controller
+@RequestMapping("/productos")
+public class ProductoControllerMAV {
+    
+    @Autowired
+    private ProductoServicio productoServicio;
+    
+    @GetMapping
+    public ModelAndView listar(
+        @RequestParam(required = false) String busqueda
+    ) {
+        ModelAndView mav = new ModelAndView("productos/lista");
+        
+        List<Producto> productos;
+        if (busqueda != null && !busqueda.isEmpty()) {
+            productos = productoServicio.buscar(busqueda);
+            mav.addObject("busqueda", busqueda);
+        } else {
+            productos = productoServicio.findAll();
+        }
+        
+        mav.addObject("productos", productos);
+        mav.addObject("total", productos.size());
+        return mav;
+    }
+    
+    @GetMapping("/{id}")
+    public ModelAndView detalle(@PathVariable Long id) {
+        Producto producto = productoServicio.findById(id);
+        
+        if (producto == null) {
+            return new ModelAndView("redirect:/productos?error=notfound");
+        }
+        
+        ModelAndView mav = new ModelAndView("productos/detalle");
+        mav.addObject("producto", producto);
+        mav.addObject("relacionados", 
+            productoServicio.findByCategoria(producto.getCategoria()));
+        return mav;
+    }
+}
+```
+
+**Conclusión:** Para el 95% de los casos, usa `Model`. Es más limpio, moderno y fácil de mantener.
 
 ### Atributos Globales
 
@@ -299,6 +485,656 @@ public class BaseController {
     }
 }
 ```
+
+## Gestión de Sesiones HTTP
+
+Las sesiones HTTP permiten mantener información del usuario entre diferentes peticiones. Son esenciales para carritos de compra, preferencias de usuario, datos temporales, etc.
+
+### ¿Qué es una Sesión HTTP?
+
+Una **sesión HTTP** es un mecanismo para almacenar información del usuario en el servidor durante múltiples peticiones. Spring crea automáticamente una sesión cuando la aplicación la necesita y la identifica mediante una cookie `JSESSIONID`.
+
+### Formas de Trabajar con Sesiones en Spring MVC
+
+#### 1. Usando HttpSession Directamente
+
+La forma más directa es inyectar `HttpSession` como parámetro en los métodos del controller:
+
+```java
+@Controller
+@RequestMapping("/carrito")
+public class CarritoController {
+    
+    @GetMapping("/agregar/{id}")
+    public String agregarProducto(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        // Obtener carrito de la sesión (o crear uno nuevo)
+        List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+        
+        if (carrito == null) {
+            carrito = new ArrayList<>();
+            session.setAttribute("carrito", carrito);
+        }
+        
+        // Agregar producto al carrito
+        Producto producto = productoServicio.findById(id);
+        carrito.add(producto);
+        
+        // Actualizar la sesión
+        session.setAttribute("carrito", carrito);
+        
+        return "redirect:/productos";
+    }
+    
+    @GetMapping("/ver")
+    public String verCarrito(HttpSession session, Model model) {
+        List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+        
+        if (carrito == null) {
+            carrito = new ArrayList<>();
+        }
+        
+        model.addAttribute("carrito", carrito);
+        model.addAttribute("total", calcularTotal(carrito));
+        return "carrito/ver";
+    }
+    
+    @GetMapping("/vaciar")
+    public String vaciarCarrito(HttpSession session) {
+        session.removeAttribute("carrito");
+        return "redirect:/carrito/ver";
+    }
+}
+```
+
+#### 2. Usando @SessionAttribute
+
+La anotación `@SessionAttribute` permite acceder directamente a atributos de sesión:
+
+```java
+@Controller
+@RequestMapping("/carrito")
+public class CarritoController {
+    
+    @GetMapping("/ver")
+    public String verCarrito(
+        @SessionAttribute(name = "carrito", required = false) List<Producto> carrito,
+        Model model
+    ) {
+        if (carrito == null) {
+            carrito = new ArrayList<>();
+        }
+        
+        model.addAttribute("carrito", carrito);
+        model.addAttribute("total", calcularTotal(carrito));
+        return "carrito/ver";
+    }
+    
+    @GetMapping("/cantidad")
+    @ResponseBody
+    public int cantidadItems(
+        @SessionAttribute(name = "carrito", required = false) List<Producto> carrito
+    ) {
+        return carrito != null ? carrito.size() : 0;
+    }
+}
+```
+
+**Importante:** `@SessionAttribute` es para **LEER** de la sesión, no para escribir. Para escribir, usa `HttpSession`.
+
+#### 3. Usando @SessionAttributes (A Nivel de Clase)
+
+Para gestionar objetos de sesión automáticamente en formularios multi-paso:
+
+```java
+@Controller
+@RequestMapping("/registro")
+@SessionAttributes("registroForm") // Mantiene este objeto en sesión
+public class RegistroController {
+    
+    @GetMapping("/paso1")
+    public String paso1(Model model) {
+        RegistroForm form = new RegistroForm();
+        model.addAttribute("registroForm", form);
+        return "registro/paso1";
+    }
+    
+    @PostMapping("/paso1")
+    public String procesarPaso1(@ModelAttribute("registroForm") RegistroForm form) {
+        // El form se guarda automáticamente en sesión
+        return "redirect:/registro/paso2";
+    }
+    
+    @GetMapping("/paso2")
+    public String paso2(@ModelAttribute("registroForm") RegistroForm form, Model model) {
+        // El form se recupera automáticamente de sesión
+        model.addAttribute("registroForm", form);
+        return "registro/paso2";
+    }
+    
+    @PostMapping("/paso2")
+    public String procesarPaso2(
+        @ModelAttribute("registroForm") RegistroForm form,
+        SessionStatus status
+    ) {
+        // Procesar registro completo
+        usuarioServicio.registrar(form);
+        
+        // Limpiar sesión al finalizar
+        status.setComplete();
+        
+        return "redirect:/login";
+    }
+}
+```
+
+### Pasar Datos de Sesión a las Vistas
+
+#### Método 1: Añadir al Model Explícitamente
+
+```java
+@GetMapping("/productos")
+public String listar(HttpSession session, Model model) {
+    // Obtener datos de sesión
+    List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+    String idioma = (String) session.getAttribute("idioma");
+    
+    // Pasar a la vista
+    model.addAttribute("carritoItems", carrito != null ? carrito.size() : 0);
+    model.addAttribute("idiomaActual", idioma);
+    
+    // Datos normales
+    model.addAttribute("productos", productoServicio.findAll());
+    return "productos/lista";
+}
+```
+
+#### Método 2: Usar @ModelAttribute Global
+
+```java
+@ControllerAdvice
+public class GlobalControllerAdvice {
+    
+    @ModelAttribute("carritoCount")
+    public int carritoCount(HttpSession session) {
+        List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+        return carrito != null ? carrito.size() : 0;
+    }
+    
+    @ModelAttribute("usuarioNombre")
+    public String usuarioNombre(Principal principal) {
+        return principal != null ? principal.getName() : "Invitado";
+    }
+}
+```
+
+Con esto, `carritoCount` y `usuarioNombre` estarán disponibles en **todas** las vistas automáticamente.
+
+### Ejemplo Práctico Completo: Carrito de Compras
+
+#### Controller del Carrito
+
+```java
+@Controller
+@RequestMapping("/carrito")
+public class CarritoController {
+    
+    @Autowired
+    private ProductoServicio productoServicio;
+    
+    // Agregar producto al carrito
+    @GetMapping("/agregar/{id}")
+    public String agregarProducto(
+        @PathVariable Long id,
+        HttpSession session,
+        RedirectAttributes redirectAttributes
+    ) {
+        // Obtener o crear carrito
+        Map<Long, ItemCarrito> carrito = obtenerCarrito(session);
+        
+        // Buscar producto
+        Producto producto = productoServicio.findById(id);
+        
+        if (producto == null) {
+            redirectAttributes.addFlashAttribute("error", "Producto no encontrado");
+            return "redirect:/productos";
+        }
+        
+        // Agregar o incrementar cantidad
+        if (carrito.containsKey(id)) {
+            ItemCarrito item = carrito.get(id);
+            item.setCantidad(item.getCantidad() + 1);
+        } else {
+            carrito.put(id, new ItemCarrito(producto, 1));
+        }
+        
+        // Actualizar sesión
+        session.setAttribute("carrito", carrito);
+        
+        redirectAttributes.addFlashAttribute("mensaje", 
+            "Producto agregado al carrito");
+        return "redirect:/productos";
+    }
+    
+    // Ver carrito
+    @GetMapping("/ver")
+    public String verCarrito(HttpSession session, Model model) {
+        Map<Long, ItemCarrito> carrito = obtenerCarrito(session);
+        
+        List<ItemCarrito> items = new ArrayList<>(carrito.values());
+        double total = items.stream()
+            .mapToDouble(item -> item.getProducto().getPrecio() * item.getCantidad())
+            .sum();
+        
+        model.addAttribute("items", items);
+        model.addAttribute("total", total);
+        model.addAttribute("cantidadItems", items.size());
+        
+        return "carrito/ver";
+    }
+    
+    // Actualizar cantidad
+    @PostMapping("/actualizar/{id}")
+    public String actualizarCantidad(
+        @PathVariable Long id,
+        @RequestParam int cantidad,
+        HttpSession session,
+        RedirectAttributes redirectAttributes
+    ) {
+        Map<Long, ItemCarrito> carrito = obtenerCarrito(session);
+        
+        if (cantidad <= 0) {
+            carrito.remove(id);
+            redirectAttributes.addFlashAttribute("mensaje", "Producto eliminado");
+        } else if (carrito.containsKey(id)) {
+            carrito.get(id).setCantidad(cantidad);
+            redirectAttributes.addFlashAttribute("mensaje", "Cantidad actualizada");
+        }
+        
+        session.setAttribute("carrito", carrito);
+        return "redirect:/carrito/ver";
+    }
+    
+    // Eliminar del carrito
+    @GetMapping("/eliminar/{id}")
+    public String eliminarProducto(
+        @PathVariable Long id,
+        HttpSession session,
+        RedirectAttributes redirectAttributes
+    ) {
+        Map<Long, ItemCarrito> carrito = obtenerCarrito(session);
+        carrito.remove(id);
+        session.setAttribute("carrito", carrito);
+        
+        redirectAttributes.addFlashAttribute("mensaje", "Producto eliminado del carrito");
+        return "redirect:/carrito/ver";
+    }
+    
+    // Vaciar carrito
+    @GetMapping("/vaciar")
+    public String vaciarCarrito(
+        HttpSession session,
+        RedirectAttributes redirectAttributes
+    ) {
+        session.removeAttribute("carrito");
+        redirectAttributes.addFlashAttribute("mensaje", "Carrito vaciado");
+        return "redirect:/carrito/ver";
+    }
+    
+    // Método auxiliar para obtener carrito
+    @SuppressWarnings("unchecked")
+    private Map<Long, ItemCarrito> obtenerCarrito(HttpSession session) {
+        Map<Long, ItemCarrito> carrito = 
+            (Map<Long, ItemCarrito>) session.getAttribute("carrito");
+        
+        if (carrito == null) {
+            carrito = new HashMap<>();
+            session.setAttribute("carrito", carrito);
+        }
+        
+        return carrito;
+    }
+}
+```
+
+#### Clase ItemCarrito
+
+```java
+public class ItemCarrito {
+    private Producto producto;
+    private int cantidad;
+    
+    public ItemCarrito() {}
+    
+    public ItemCarrito(Producto producto, int cantidad) {
+        this.producto = producto;
+        this.cantidad = cantidad;
+    }
+    
+    public double getSubtotal() {
+        return producto.getPrecio() * cantidad;
+    }
+    
+    // Getters y setters
+}
+```
+
+#### ControllerAdvice para Mostrar Contador en Todas las Páginas
+
+```java
+@ControllerAdvice
+public class CarritoAdvice {
+    
+    @ModelAttribute("carritoCount")
+    public int carritoCount(HttpSession session) {
+        @SuppressWarnings("unchecked")
+        Map<Long, ItemCarrito> carrito = 
+            (Map<Long, ItemCarrito>) session.getAttribute("carrito");
+        
+        if (carrito == null) {
+            return 0;
+        }
+        
+        // Retornar suma de cantidades
+        return carrito.values().stream()
+            .mapToInt(ItemCarrito::getCantidad)
+            .sum();
+    }
+}
+```
+
+#### Vista: Mostrar Contador en Navbar (Pebble)
+
+```pebble
+{# templates/fragments/navbar.peb #}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">WalaSpringBoot</a>
+        
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/productos">
+                    <i class="bi bi-shop"></i> Productos
+                </a>
+            </li>
+            
+            {# Contador de carrito desde sesión #}
+            <li class="nav-item">
+                <a class="nav-link" href="/carrito/ver">
+                    <i class="bi bi-cart"></i> Carrito
+                    {% if carritoCount > 0 %}
+                    <span class="badge bg-danger">{{ carritoCount }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            
+            {% if usuario %}
+            <li class="nav-item">
+                <a class="nav-link" href="/perfil">
+                    <i class="bi bi-person"></i> {{ usuario.nombre }}
+                </a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="/auth/login">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+```
+
+#### Vista: Página del Carrito
+
+```pebble
+{# templates/carrito/ver.peb #}
+{% extends "layouts/base.peb" %}
+
+{% block title %}Mi Carrito{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-cart"></i> Mi Carrito</h1>
+    
+    {% if items is empty %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        Tu carrito está vacío. <a href="/productos">Ver productos</a>
+    </div>
+    {% else %}
+    
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <img src="{{ item.producto.imagen }}" 
+                             width="50" class="me-2">
+                        {{ item.producto.nombre }}
+                    </td>
+                    <td>{{ item.producto.precio | numberformat('0.00') }}€</td>
+                    <td>
+                        <form method="POST" 
+                              action="/carrito/actualizar/{{ item.producto.id }}" 
+                              class="d-inline">
+                            <input type="number" name="cantidad" 
+                                   value="{{ item.cantidad }}" 
+                                   min="1" max="99" 
+                                   class="form-control form-control-sm" 
+                                   style="width: 70px;">
+                            <button type="submit" class="btn btn-sm btn-primary mt-1">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>{{ item.subtotal | numberformat('0.00') }}€</td>
+                    <td>
+                        <a href="/carrito/eliminar/{{ item.producto.id }}" 
+                           class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                    <td colspan="2">
+                        <strong>{{ total | numberformat('0.00') }}€</strong>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    
+    <div class="d-flex justify-content-between mt-3">
+        <a href="/productos" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Seguir Comprando
+        </a>
+        <div>
+            <a href="/carrito/vaciar" class="btn btn-warning me-2">
+                <i class="bi bi-trash"></i> Vaciar Carrito
+            </a>
+            <a href="/compra/finalizar" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Finalizar Compra
+            </a>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}
+```
+
+### Ciclo de Vida de las Sesiones
+
+#### Creación de Sesión
+
+```java
+// Spring crea la sesión automáticamente al primer setAttribute
+HttpSession session = request.getSession(); // Obtiene o crea
+session.setAttribute("usuario", usuario);
+```
+
+#### Timeout de Sesión
+
+**En application.properties:**
+
+```properties
+# Timeout de sesión en segundos (30 minutos = 1800 segundos)
+server.servlet.session.timeout=1800
+```
+
+**O en código:**
+
+```java
+@GetMapping("/login")
+public String login(HttpSession session) {
+    // Configurar timeout: 30 minutos
+    session.setMaxInactiveInterval(30 * 60);
+    return "login";
+}
+```
+
+#### Invalidar Sesión (Logout)
+
+```java
+@GetMapping("/logout")
+public String logout(HttpSession session) {
+    // Invalida la sesión completamente
+    session.invalidate();
+    return "redirect:/";
+}
+```
+
+#### Renovar ID de Sesión (Seguridad)
+
+```java
+@PostMapping("/login")
+public String procesarLogin(
+    @ModelAttribute LoginForm form,
+    HttpServletRequest request
+) {
+    // Autenticar usuario...
+    
+    // Cambiar ID de sesión para prevenir session fixation
+    HttpSession oldSession = request.getSession(false);
+    if (oldSession != null) {
+        oldSession.invalidate();
+    }
+    
+    HttpSession newSession = request.getSession(true);
+    newSession.setAttribute("usuario", usuario);
+    
+    return "redirect:/dashboard";
+}
+```
+
+### Mejores Prácticas con Sesiones
+
+#### 1. Minimizar Datos en Sesión
+
+❌ **Mal:**
+```java
+// Guardar objetos grandes en sesión
+session.setAttribute("todosLosProductos", productoServicio.findAll());
+```
+
+✅ **Bien:**
+```java
+// Solo guardar IDs, recuperar cuando sea necesario
+session.setAttribute("productosSeleccionados", listaDeIds);
+```
+
+#### 2. Usar Nombres Descriptivos
+
+❌ **Mal:**
+```java
+session.setAttribute("data", carrito);
+session.setAttribute("u", usuario);
+```
+
+✅ **Bien:**
+```java
+session.setAttribute("carrito", carrito);
+session.setAttribute("usuarioActual", usuario);
+```
+
+#### 3. Verificar Existencia
+
+✅ **Bien:**
+```java
+@GetMapping("/checkout")
+public String checkout(HttpSession session, Model model) {
+    List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+    
+    if (carrito == null || carrito.isEmpty()) {
+        return "redirect:/carrito/ver?error=vacio";
+    }
+    
+    // Continuar con checkout...
+    return "checkout";
+}
+```
+
+#### 4. Limpiar Sesión Cuando ya no se Necesite
+
+```java
+@PostMapping("/compra/finalizar")
+public String finalizarCompra(HttpSession session) {
+    List<Producto> carrito = (List<Producto>) session.getAttribute("carrito");
+    
+    // Procesar compra...
+    compraServicio.procesar(carrito);
+    
+    // Limpiar carrito de sesión
+    session.removeAttribute("carrito");
+    
+    return "redirect:/compras/confirmacion";
+}
+```
+
+### Sesiones en Entornos de Producción
+
+Para aplicaciones con múltiples servidores (load balancing), considera:
+
+#### Sticky Sessions
+- El load balancer dirige al usuario siempre al mismo servidor
+- Configuración en el balanceador de carga
+
+#### Sesiones Compartidas (Redis/Hazelcast)
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.session:spring-session-data-redis")
+}
+```
+
+```properties
+# application.properties
+spring.session.store-type=redis
+spring.redis.host=localhost
+spring.redis.port=6379
+```
+
+Con esto, las sesiones se almacenan en Redis y están disponibles para todos los servidores.
 
 ## Modelos y Vista
 

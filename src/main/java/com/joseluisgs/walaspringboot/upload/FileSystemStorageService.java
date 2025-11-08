@@ -39,14 +39,18 @@ public class FileSystemStorageService implements StorageService{
     @PostConstruct
     public void initializeStorage() {
         if ("dev".equals(activeProfile)) {
-            logger.info("Perfil DEV: Limpiando directorio de uploads al iniciar");
+            logger.info("🔧 PERFIL DEV: Limpiando directorio de uploads al iniciar");
             deleteAll();
             init();
+            logger.info("✅ Directorio de uploads limpiado y recreado");
         } else {
-            logger.info("Perfil PROD: Verificando existencia del directorio de uploads");
+            logger.info("🚀 PERFIL PROD: Verificando existencia del directorio de uploads");
             if (!Files.exists(rootLocation)) {
-                logger.info("Directorio no existe, creando...");
+                logger.info("📁 Directorio no existe, creando...");
                 init();
+                logger.info("✅ Directorio de uploads creado");
+            } else {
+                logger.info("✅ Directorio de uploads ya existe, manteniendo archivos existentes");
             }
         }
     }

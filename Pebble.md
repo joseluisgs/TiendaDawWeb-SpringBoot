@@ -660,6 +660,381 @@ Las macros son funciones reutilizables que generan HTML.
 {% endif %}
 ```
 
+## Integración con Datos de Sesión en Plantillas
+
+Las sesiones HTTP permiten mantener información del usuario entre diferentes peticiones. En Pebble, puedes acceder a datos de sesión que el controller pasa al modelo.
+
+### Mostrar Datos de Sesión desde el Controller
+
+#### En el Controller
+
+```java
+@ControllerAdvice
+public class GlobalControllerAdvice {
+    
+    @ModelAttribute("carritoCount")
+    public int carritoCount(HttpSession session) {
+        @SuppressWarnings("unchecked")
+        Map<Long, ItemCarrito> carrito = 
+            (Map<Long, ItemCarrito>) session.getAttribute("carrito");
+        return carrito != null ? carrito.values().stream()
+            .mapToInt(ItemCarrito::getCantidad).sum() : 0;
+    }
+    
+    @ModelAttribute("preferenciaIdioma")
+    public String preferenciaIdioma(HttpSession session) {
+        String idioma = (String) session.getAttribute("idioma");
+        return idioma != null ? idioma : "es";
+    }
+}
+```
+
+#### En la Plantilla Pebble
+
+```pebble
+{# Navbar con contador de carrito desde sesión #}
+<nav class="navbar navbar-expand-lg">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" href="/carrito">
+                <i class="bi bi-cart"></i> Carrito
+                {% if carritoCount > 0 %}
+                <span class="badge bg-danger">{{ carritoCount }}</span>
+                {% endif %}
+            </a>
+        </li>
+    </ul>
+    
+    {# Selector de idioma basado en preferencia de sesión #}
+    <div class="dropdown">
+        <button class="btn btn-link">
+            {% if preferenciaIdioma == 'es' %}
+            🇪🇸 Español
+            {% else %}
+            🇬🇧 English
+            {% endif %}
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="?lang=es">🇪🇸 Español</a></li>
+            <li><a href="?lang=en">🇬🇧 English</a></li>
+        </ul>
+    </div>
+</nav>
+```
+
+### Ejemplo Completo: Carrito de Compras con Sesión
+
+#### Controller
+
+```java
+@Controller
+@RequestMapping("/carrito")
+public class CarritoController {
+    
+    @GetMapping("/ver")
+    public String verCarrito(HttpSession session, Model model) {
+        @SuppressWarnings("unchecked")
+        Map<Long, ItemCarrito> carrito = 
+            (Map<Long, ItemCarrito>) session.getAttribute("carrito");
+        
+        if (carrito == null) {
+            carrito = new HashMap<>();
+        }
+        
+        List<ItemCarrito> items = new ArrayList<>(carrito.values());
+        double total = items.stream()
+            .mapToDouble(item -> item.getProducto().getPrecio() * item.getCantidad())
+            .sum();
+        
+        model.addAttribute("items", items);
+        model.addAttribute("total", total);
+        model.addAttribute("isEmpty", items.isEmpty());
+        
+        return "carrito/ver";
+    }
+}
+```
+
+#### Plantilla: carrito/ver.peb
+
+```pebble
+{% extends "layouts/base.peb" %}
+
+{% block title %}Mi Carrito de Compras{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-cart-fill"></i> Mi Carrito</h1>
+    
+    {# Verificar si el carrito está vacío #}
+    {% if isEmpty %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        Tu carrito está vacío. 
+        <a href="/productos" class="alert-link">Explorar productos</a>
+    </div>
+    {% else %}
+    
+    {# Tabla de productos en el carrito #}
+    <div class="card">
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio Unitario</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ item.producto.imagen }}" 
+                                     width="60" 
+                                     class="me-3 rounded">
+                                <div>
+                                    <strong>{{ item.producto.nombre }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.producto.categoria }}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ item.producto.precio | numberformat('0.00') }}€</td>
+                        <td>
+                            <form method="POST" 
+                                  action="/carrito/actualizar/{{ item.producto.id }}" 
+                                  class="d-flex align-items-center">
+                                <input type="number" 
+                                       name="cantidad" 
+                                       value="{{ item.cantidad }}" 
+                                       min="1" 
+                                       max="99" 
+                                       class="form-control form-control-sm me-2" 
+                                       style="width: 70px;">
+                                <button type="submit" 
+                                        class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <strong>{{ item.subtotal | numberformat('0.00') }}€</strong>
+                        </td>
+                        <td>
+                            <a href="/carrito/eliminar/{{ item.producto.id }}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Eliminar este producto?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {# Total del carrito #}
+            <div class="row">
+                <div class="col-md-6 offset-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5>Resumen del Pedido</h5>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <span>Subtotal ({{ items | length }} items):</span>
+                                <strong>{{ total | numberformat('0.00') }}€</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Envío:</span>
+                                <strong>
+                                    {% if total > 50 %}
+                                    <span class="text-success">GRATIS</span>
+                                    {% else %}
+                                    {{ 5.99 | numberformat('0.00') }}€
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total:</strong>
+                                <strong class="text-primary fs-4">
+                                    {{ (total > 50 ? total : total + 5.99) | numberformat('0.00') }}€
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {# Botones de acción #}
+    <div class="d-flex justify-content-between mt-4">
+        <a href="/productos" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Seguir Comprando
+        </a>
+        <div>
+            <a href="/carrito/vaciar" 
+               class="btn btn-warning me-2"
+               onclick="return confirm('¿Vaciar todo el carrito?')">
+                <i class="bi bi-trash"></i> Vaciar Carrito
+            </a>
+            <a href="/compra/finalizar" class="btn btn-success btn-lg">
+                <i class="bi bi-check-circle"></i> Proceder al Pago
+            </a>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}
+```
+
+### Mostrar Mensaje de Bienvenida con Datos de Sesión
+
+```pebble
+{# Mostrar nombre de usuario desde sesión #}
+{% if usuarioNombre %}
+<div class="alert alert-info">
+    👋 Bienvenido de nuevo, <strong>{{ usuarioNombre }}</strong>!
+    <a href="/auth/logout" class="btn btn-sm btn-outline-secondary ms-3">
+        Cerrar Sesión
+    </a>
+</div>
+{% endif %}
+
+{# Mostrar última visita #}
+{% if ultimaVisita %}
+<p class="text-muted">
+    Última visita: {{ ultimaVisita | date('dd/MM/yyyy HH:mm') }}
+</p>
+{% endif %}
+```
+
+### Condicionales Basados en Datos de Sesión
+
+```pebble
+{# Mostrar diferentes opciones según rol del usuario #}
+{% if usuarioRol == 'ADMIN' %}
+<div class="admin-panel">
+    <h3>Panel de Administración</h3>
+    <ul>
+        <li><a href="/admin/usuarios">Gestionar Usuarios</a></li>
+        <li><a href="/admin/productos">Gestionar Productos</a></li>
+        <li><a href="/admin/estadisticas">Ver Estadísticas</a></li>
+    </ul>
+</div>
+{% elseif usuarioRol == 'MODERATOR' %}
+<div class="moderator-panel">
+    <h3>Panel de Moderación</h3>
+    <ul>
+        <li><a href="/moderador/reportes">Ver Reportes</a></li>
+        <li><a href="/moderador/comentarios">Moderar Comentarios</a></li>
+    </ul>
+</div>
+{% else %}
+<div class="user-panel">
+    <h3>Mi Cuenta</h3>
+    <ul>
+        <li><a href="/perfil">Mi Perfil</a></li>
+        <li><a href="/compras">Mis Compras</a></li>
+        <li><a href="/productos/mis-productos">Mis Productos</a></li>
+    </ul>
+</div>
+{% endif %}
+
+{# Mostrar banner promocional solo si el usuario no lo ha cerrado #}
+{% if not bannerCerrado %}
+<div class="alert alert-warning alert-dismissible">
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <strong>¡Oferta especial!</strong> 20% de descuento en tu primera compra.
+    <a href="/promociones">Ver ofertas</a>
+</div>
+{% endif %}
+```
+
+### Personalización de Vista Según Preferencias de Sesión
+
+```pebble
+{# Tema oscuro/claro basado en preferencia de sesión #}
+<body class="{% if temaOscuro %}theme-dark{% else %}theme-light{% endif %}">
+
+{# Vista de lista vs cuadrícula según preferencia #}
+{% if vistaPreferida == 'grid' %}
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for producto in productos %}
+    <div class="col">
+        <div class="card">
+            <img src="{{ producto.imagen }}" class="card-img-top">
+            <div class="card-body">
+                <h5>{{ producto.nombre }}</h5>
+                <p>{{ producto.precio }}€</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="list-group">
+    {% for producto in productos %}
+    <div class="list-group-item">
+        <div class="d-flex">
+            <img src="{{ producto.imagen }}" width="100" class="me-3">
+            <div>
+                <h5>{{ producto.nombre }}</h5>
+                <p>{{ producto.descripcion | slice(0, 100) }}...</p>
+                <strong>{{ producto.precio }}€</strong>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# Botones para cambiar vista #}
+<div class="btn-group mb-3">
+    <a href="/productos?vista=grid" 
+       class="btn btn-outline-secondary {{ vistaPreferida == 'grid' ? 'active' : '' }}">
+        <i class="bi bi-grid-3x3"></i> Cuadrícula
+    </a>
+    <a href="/productos?vista=list" 
+       class="btn btn-outline-secondary {{ vistaPreferida == 'list' ? 'active' : '' }}">
+        <i class="bi bi-list"></i> Lista
+    </a>
+</div>
+```
+
+### Notificaciones y Mensajes Flash desde Sesión
+
+```pebble
+{# Mostrar mensajes flash (almacenados temporalmente en sesión) #}
+{% if mensaje %}
+<div class="alert alert-success alert-dismissible fade show">
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <i class="bi bi-check-circle"></i> {{ mensaje }}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show">
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+{% if advertencia %}
+<div class="alert alert-warning alert-dismissible fade show">
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <i class="bi bi-info-circle"></i> {{ advertencia }}
+</div>
+{% endif %}
+```
+
 ## Internacionalización
 
 ### Configuración
@@ -682,6 +1057,8 @@ producto.nombre=Nombre del Producto
 producto.precio=Precio
 producto.crear=Crear Producto
 usuario.bienvenida=Bienvenido, {0}
+carrito.vacio=Tu carrito está vacío
+carrito.items=items en el carrito
 ```
 
 **messages_en.properties:**
@@ -691,6 +1068,8 @@ producto.nombre=Product Name
 producto.precio=Price
 producto.crear=Create Product
 usuario.bienvenida=Welcome, {0}
+carrito.vacio=Your cart is empty
+carrito.items=items in cart
 ```
 
 ### Uso en Plantillas
@@ -706,18 +1085,42 @@ usuario.bienvenida=Welcome, {0}
 
 {# Con parámetros #}
 <p>{{ i18n('usuario.bienvenida', usuario.nombre) }}</p>
+
+{# En el carrito #}
+{% if carritoCount > 0 %}
+<span class="badge bg-primary">
+    {{ carritoCount }} {{ i18n('carrito.items') }}
+</span>
+{% else %}
+<p>{{ i18n('carrito.vacio') }}</p>
+{% endif %}
 ```
 
-### Selector de Idioma
+### Selector de Idioma con Sesión
 
 ```pebble
 <div class="dropdown">
     <button class="btn btn-link dropdown-toggle" data-bs-toggle="dropdown">
         <i class="bi bi-globe"></i>
+        {% if idiomaActual == 'es' %}
+        Español
+        {% else %}
+        English
+        {% endif %}
     </button>
     <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="?lang=es">Español</a></li>
-        <li><a class="dropdown-item" href="?lang=en">English</a></li>
+        <li>
+            <a class="dropdown-item {{ idiomaActual == 'es' ? 'active' : '' }}" 
+               href="?lang=es">
+                🇪🇸 Español
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item {{ idiomaActual == 'en' ? 'active' : '' }}" 
+               href="?lang=en">
+                🇬🇧 English
+            </a>
+        </li>
     </ul>
 </div>
 ```
