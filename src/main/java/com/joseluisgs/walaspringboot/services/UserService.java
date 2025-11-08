@@ -37,4 +37,14 @@ public class UserService {
     public java.util.List<User> findAll() {
         return repositorio.findAll();
     }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
+    public User editar(User u) {
+        return repositorio.save(u);
+    }
+
+    @CacheEvict(value = "usuarios", allEntries = true)
+    public void borrar(Long id) {
+        repositorio.deleteById(id);
+    }
 }

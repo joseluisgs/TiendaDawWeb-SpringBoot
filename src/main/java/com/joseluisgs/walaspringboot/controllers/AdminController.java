@@ -63,4 +63,22 @@ public class AdminController {
         model.addAttribute("productos", productoServicio.findAll());
         return "admin/productos";
     }
+
+    @GetMapping("/usuarios/eliminar/{id}")
+    public String eliminarUsuario(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        usuarioServicio.borrar(id);
+        return "redirect:/admin/usuarios";
+    }
+
+    @GetMapping("/productos/eliminar/{id}")
+    public String eliminarProducto(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        productoServicio.borrar(productoServicio.findById(id));
+        return "redirect:/admin/productos";
+    }
+
+    @GetMapping("/ventas")
+    public String gestionVentas(Model model) {
+        model.addAttribute("compras", compraServicio.findAll());
+        return "admin/ventas";
+    }
 }

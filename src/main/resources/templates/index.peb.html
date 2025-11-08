@@ -11,7 +11,7 @@
     <!-- Filtros -->
     <div class="card mb-4">
         <div class="card-body">
-            <form action="/" class="row g-3" method="get">
+            <form action="/public" class="row g-3" method="get">
                 <div class="col-md-4">
                     <label class="form-label">{{ message('product.search') }}</label>
                     <input class="form-control" name="q" placeholder="{{ message('product.search') }}" type="text"
@@ -73,7 +73,7 @@
                         <div class="col-md-6">
                             <h4 class="text-primary mb-0">{{ producto.precio }}€</h4>
                         </div>
-                        {% if authenticated and username != producto.propietario.email %}
+                        {% if isAuthenticated and currentUser.email != producto.propietario.email %}
                         <div class="col-md-6 text-end">
                             <a class="btn btn-success btn-sm" href="/app/carrito/add/{{ producto.id }}"
                                onclick="event.stopPropagation();">

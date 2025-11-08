@@ -27,7 +27,7 @@
                     <div class="mb-3">
                         <h4 class="text-primary"><strong>{{ producto.precio }}€</strong></h4>
                     </div>
-                    {% if authenticated and username != producto.propietario.email %}
+                    {% if isAuthenticated and currentUser.email != producto.propietario.email %}
                     <a class="btn btn-lg btn-success w-100" href="/app/carrito/add/{{ producto.id }}">
                         <i class="bi bi-cart-plus"></i> Comprar
                     </a>

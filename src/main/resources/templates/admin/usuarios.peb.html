@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
-{% include "fragments/head.peb" %}
+{% include "fragments/head" %}
 <body>
-{% include "fragments/navbar.peb" %}
+{% include "fragments/navbar" %}
 
 <div class="container mt-5 pt-5">
     <div class="row">
@@ -47,9 +47,11 @@
                         </td>
                         <td>{{ usuario.fechaAlta | date('dd/MM/yyyy') }}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" disabled>
-                                <i class="bi bi-pencil"></i>
+                            {% if usuario.rol != 'ADMIN' or usuarios | length > 1 %}
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ usuario.id }}" data-name="{{ usuario.nombre }} {{ usuario.apellidos }}">
+                                <i class="bi bi-trash"></i>
                             </button>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -60,11 +62,44 @@
     </div>
 </div>
 
-{% include "fragments/footer.peb" %}
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar al usuario <strong id="userName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a id="confirmDelete" href="#" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer" %}
 
 <!-- Bootstrap JS -->
 <script crossorigin="anonymous"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var userId = button.getAttribute('data-id');
+            var userName = button.getAttribute('data-name');
+            var confirmBtn = document.getElementById('confirmDelete');
+            var userNameSpan = document.getElementById('userName');
+            confirmBtn.href = '/admin/usuarios/eliminar/' + userId;
+            userNameSpan.textContent = userName;
+        });
+    });
+</script>
 </body>
 </html>

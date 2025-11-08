@@ -35,4 +35,24 @@ public class GlobalControllerAdvice {
         }
         return false;
     }
+
+    @ModelAttribute("username")
+    public String getUsername(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication.getPrincipal() instanceof String)) {
+            User user = (User) authentication.getPrincipal();
+            return user.getNombre() + " " + user.getApellidos();
+        }
+        return null;
+    }
+
+    @ModelAttribute("userRole")
+    public String getUserRole(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication.getPrincipal() instanceof String)) {
+            User user = (User) authentication.getPrincipal();
+            return user.getRol();
+        }
+        return null;
+    }
 }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+{% include "fragments/head" %}
+
+<body class="d-flex flex-column min-vh-100">
+{% include "fragments/navbar" %}
+
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-circle"></i> Mi Perfil</h4>
+                </div>
+                <div class="card-body">
+                    {% if mensaje %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle"></i> {{ mensaje }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <img alt="Avatar" 
+                                 class="img-fluid rounded-circle shadow mb-3" 
+                                 src="{% if usuario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ usuario.email }}.png{% else %}{{ usuario.avatar }}{% endif %}" 
+                                 style="width: 200px; height: 200px; object-fit: cover;">
+                            <p class="text-muted small">{{ usuario.email }}</p>
+                            <span class="badge bg-{% if usuario.rol == 'ADMIN' %}danger{% elseif usuario.rol == 'MODERATOR' %}warning{% else %}info{% endif %}">
+                                {{ usuario.rol }}
+                            </span>
+                        </div>
+                        <div class="col-md-8">
+                            <form action="/app/perfil/editar" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                                
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                                           value="{{ usuario.nombre }}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="apellidos" class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" id="apellidos" name="apellidos" 
+                                           value="{{ usuario.apellidos }}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" 
+                                           value="{{ usuario.email }}" disabled>
+                                    <small class="text-muted">El email no se puede modificar</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="file" class="form-label">Cambiar Avatar</label>
+                                    <input type="file" class="form-control" id="file" name="file" accept="image/*">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha de Alta</label>
+                                    <p class="form-control-plaintext">{{ usuario.fechaAlta }}</p>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Guardar Cambios
+                                    </button>
+                                    <a href="/public" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left"></i> Volver
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer" %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

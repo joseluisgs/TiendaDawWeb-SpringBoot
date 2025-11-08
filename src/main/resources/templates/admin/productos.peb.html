@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
-{% include "fragments/head.peb" %}
+{% include "fragments/head" %}
 <body>
-{% include "fragments/navbar.peb" %}
+{% include "fragments/navbar" %}
 
 <div class="container mt-5 pt-5">
     <div class="row">
@@ -26,6 +26,7 @@
                         <th>{{ message('product.category') }}</th>
                         <th>{{ message('product.owner') }}</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -51,6 +52,11 @@
                             <span class="badge bg-warning">Disponible</span>
                             {% endif %}
                         </td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ producto.id }}" data-name="{{ producto.nombre }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -60,11 +66,44 @@
     </div>
 </div>
 
-{% include "fragments/footer.peb" %}
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar el producto <strong id="productName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a id="confirmDelete" href="#" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer" %}
 
 <!-- Bootstrap JS -->
 <script crossorigin="anonymous"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var productId = button.getAttribute('data-id');
+            var productName = button.getAttribute('data-name');
+            var confirmBtn = document.getElementById('confirmDelete');
+            var productNameSpan = document.getElementById('productName');
+            confirmBtn.href = '/admin/productos/eliminar/' + productId;
+            productNameSpan.textContent = productName;
+        });
+    });
+</script>
 </body>
 </html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+{% include "fragments/head" %}
+
+<body class="d-flex flex-column min-vh-100">
+{% include "fragments/navbar" %}
+
+<div class="container mt-5 pt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-cash-stack"></i> Gestión de Ventas</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Ventas</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Todas las Transacciones</h4>
+        </div>
+        <div class="card-body">
+            {% if compras is empty %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No hay ventas registradas
+            </div>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Comprador</th>
+                            <th>Email</th>
+                            <th>Productos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for compra in compras %}
+                        <tr>
+                            <td>{{ compra.id }}</td>
+                            <td>{{ compra.fechaCompra }}</td>
+                            <td>{{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</td>
+                            <td>{{ compra.propietario.email }}</td>
+                            <td>
+                                <a href="/app/miscompras/factura/{{ compra.id }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> Ver Detalles
+                                </a>
+                            </td>
+                            <td>
+                                <a href="/app/miscompras/factura/pdf/{{ compra.id }}" class="btn btn-sm btn-danger" target="_blank">
+                                    <i class="bi bi-file-pdf"></i> PDF
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer" %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

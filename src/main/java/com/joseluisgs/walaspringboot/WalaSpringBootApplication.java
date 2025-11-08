@@ -20,7 +20,7 @@ import java.util.List;
 @SpringBootApplication
 public class WalaSpringBootApplication {
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(WalaSpringBootApplication.class, args);
     }
 
