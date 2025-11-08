@@ -11,12 +11,15 @@
             <div class="row">
                 <div class="col-md-8">
                     <img alt="{{ producto.nombre }}"
-                         class="img-fluid rounded shadow" src="{% if producto.imagen is empty %}https://placehold.it/1200x600?text=SIN%20IMAGEN{% else %}{{ producto.imagen }}{% endif %}">
+                         class="img-fluid rounded shadow"
+                         src="{% if producto.imagen is empty %}https://placehold.it/1200x600?text=SIN%20IMAGEN{% else %}{{ producto.imagen }}{% endif %}">
                 </div>
                 <div class="col-md-4">
                     <div class="text-center mb-4">
                         <img alt="Avatar"
-                             class="rounded-circle shadow" height="140" src="{% if producto.propietario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ producto.propietario.email }}.png{% else %}{{ producto.propietario.avatar }}{% endif %}" width="140">
+                             class="rounded-circle shadow" height="140"
+                             src="{% if producto.propietario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ producto.propietario.email }}.png{% else %}{{ producto.propietario.avatar }}{% endif %}"
+                             width="140">
                         <h5 class="mt-3">{{ producto.propietario.nombre }} {{ producto.propietario.apellidos }}<br>
                             <small class="text-muted">{{ producto.propietario.email }}</small>
                         </h5>
