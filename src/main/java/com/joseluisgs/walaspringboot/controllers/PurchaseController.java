@@ -6,6 +6,7 @@ import com.joseluisgs.walaspringboot.models.User;
 import com.joseluisgs.walaspringboot.services.PurchaseService;
 import com.joseluisgs.walaspringboot.services.ProductService;
 import com.joseluisgs.walaspringboot.services.UserService;
+import com.joseluisgs.walaspringboot.services.EmailService;
 import com.joseluisgs.walaspringboot.utils.GeneradorPDF;
 import com.joseluisgs.walaspringboot.utils.Html2PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,9 @@ public class PurchaseController {
     @Autowired
     Html2PdfService documentGeneratorService;
 
+    // Para Email
+    @Autowired
+    EmailService emailService;
 
 
     // Para mapear el usuario identificado con lo que tenemos almacenado
@@ -172,6 +176,16 @@ public class PurchaseController {
         session.removeAttribute("carrito");
         session.removeAttribute("items_carrito");
 
+        // Enviar email de confirmación de manera asíncrona para no bloquear
+        new Thread(() -> {
+            try {
+                emailService.enviarEmailConfirmacionCompra(c);
+            } catch (Exception e) {
+                // Log error but don't fail the purchase
+                System.err.println("Error enviando email: " + e.getMessage());
+            }
+        }).start();
+
         // Abrimos la factura
         return "redirect:/app/miscompras/factura/"+c.getId();
 
@@ -180,6 +194,9 @@ public class PurchaseController {
     // Mustra las compras e un listado
     @GetMapping("/miscompras")
     public String verMisCompras(Model model) {
+        // Obtener todos los productos para poder mostrarlos por compra
+        List<Product> todosProductos = productoServicio.findAll();
+        model.addAttribute("productos", todosProductos);
         return "/app/compra/listado";
     }
 
@@ -194,7 +211,9 @@ public class PurchaseController {
         model.addAttribute("productos", productos);
         model.addAttribute("compra", c);
         // Calculamos el total de la compra, es un for each
-        model.addAttribute("total_compra", productos.stream().mapToDouble(p -> p.getPrecio()).sum());
+        Double total = productos.stream().mapToDouble(p -> p.getPrecio()).sum();
+        model.addAttribute("total_compra", total);
+        model.addAttribute("total", total);
         // Devolvemos la factura
         return "/app/compra/factura";
     }

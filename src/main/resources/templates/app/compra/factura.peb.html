@@ -7,53 +7,90 @@
 
 <div class="container mt-5 pt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0">Factura #{{ compra.id }}</h4>
+        <div class="col-md-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0"><i class="bi bi-receipt"></i> WalaSpringBoot</h3>
+                            <small>Tienda de Segunda Mano</small>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">Factura #{{ compra.id }}</h4>
+                            <small>{{ compra.fechaCompra | formatDate }}</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="mb-4">
-                        <h5>Datos de la compra:</h5>
-                        <p><strong>Fecha:</strong> {{ compra.fechaCompra | formatDate }}</p>
-                        <p><strong>Comprador:</strong> {{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</p>
-                        <p><strong>Email:</strong> {{ compra.propietario.email }}</p>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2"><i class="bi bi-person-circle"></i> Datos del Cliente</h5>
+                            <p class="mb-1"><strong>Nombre:</strong> {{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ compra.propietario.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2"><i class="bi bi-calendar-check"></i> Información de Compra</h5>
+                            <p class="mb-1"><strong>Fecha de compra:</strong> {{ compra.fechaCompra | formatDate }}</p>
+                            <p class="mb-1"><strong>ID Transacción:</strong> #{{ compra.id }}</p>
+                        </div>
                     </div>
                     
-                    <h5>Productos:</h5>
+                    <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-cart-check"></i> Productos Adquiridos</h5>
                     <div class="table-responsive">
-                        <table class="table">
-                            <thead>
+                        <table class="table table-hover">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>Producto</th>
-                                    <th>Vendedor</th>
-                                    <th class="text-end">Precio</th>
+                                    <th style="width: 50%">Producto</th>
+                                    <th style="width: 30%">Vendedor</th>
+                                    <th class="text-end" style="width: 20%">Precio</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for producto in productos %}
                                 <tr>
-                                    <td>{{ producto.nombre }}</td>
+                                    <td><strong>{{ producto.nombre }}</strong></td>
                                     <td>{{ producto.propietario.email }}</td>
                                     <td class="text-end">{{ producto.precio | formatPrice }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="2" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong>{{ total | formatPrice }}</strong></td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
                     
+                    <div class="row justify-content-end mt-4">
+                        <div class="col-md-5">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td class="text-end">Subtotal (sin IVA):</td>
+                                    <td class="text-end"><strong>{{ (total / 1.21) | formatPrice }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end">IVA (21%):</td>
+                                    <td class="text-end"><strong>{{ (total - (total / 1.21)) | formatPrice }}</strong></td>
+                                </tr>
+                                <tr class="table-active">
+                                    <td class="text-end"><h5 class="mb-0">TOTAL:</h5></td>
+                                    <td class="text-end"><h5 class="mb-0 text-primary">{{ total | formatPrice }}</h5></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4" role="alert">
+                        <i class="bi bi-info-circle"></i> <strong>Nota:</strong> Esta es tu factura de compra. Guárdala para tus registros.
+                    </div>
+                    
                     <div class="mt-4 d-flex justify-content-between">
-                        <a href="/app/miscompras" class="btn btn-secondary">Volver a mis compras</a>
-                        <a href="/app/compra/factura/{{ compra.id }}/pdf" class="btn btn-danger">
+                        <a href="/app/miscompras" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver a mis compras
+                        </a>
+                        <a href="/app/miscompras/factura/{{ compra.id }}/pdf" class="btn btn-danger">
                             <i class="bi bi-file-pdf"></i> Descargar PDF
                         </a>
                     </div>
+                </div>
+                <div class="card-footer text-center text-muted">
+                    <small>Gracias por confiar en WalaSpringBoot - © 2025</small>
                 </div>
             </div>
         </div>

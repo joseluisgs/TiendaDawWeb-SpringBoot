@@ -46,7 +46,7 @@
                         <td><span class="badge bg-secondary">{{ producto.categoria }}</span></td>
                         <td>{{ producto.propietario.nombre }}</td>
                         <td>
-                            {% if producto.compra %}
+                            {% if producto.compra is not null %}
                             <span class="badge bg-success">Vendido</span>
                             {% else %}
                             <span class="badge bg-warning">Disponible</span>
