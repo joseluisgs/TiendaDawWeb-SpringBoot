@@ -87,6 +87,9 @@ public class ProductController {
                 String imagen = storageService.store(file);
                 producto.setImagen(MvcUriComponentsBuilder
                         .fromMethodName(FilesController.class, "serveFile", imagen).build().toUriString());
+            } else {
+                // Asignar imagen por defecto si no se sube archivo
+                producto.setImagen(Product.DEFAULT_IMAGE);
             }
             // Indicamos el propietario
             producto.setPropietario(usuario);
@@ -129,13 +132,16 @@ public class ProductController {
 
             // Asignamos la nueva
             if (!file.isEmpty()) {
-                // Borramos la antigua si se puede si existe en el nuestro directorio
-                storageService.delete(p.getImagen());
+                // Borramos la antigua si se puede si existe en el nuestro directorio (solo si no es una URL externa)
+                if (p.getImagen() != null && !p.getImagen().startsWith("http")) {
+                    storageService.delete(p.getImagen());
+                }
                 // Subimos la nueva
                 String imagen = storageService.store(file);
                 actualProducto.setImagen(MvcUriComponentsBuilder
                         .fromMethodName(FilesController.class, "serveFile", imagen).build().toUriString());
             }
+            // Si no se sube archivo, mantener imagen actual (ya establecida en línea 130)
             // Actualizamos el producto
             productoServicio.editar(actualProducto);
             return "redirect:/app/misproductos";

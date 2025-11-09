@@ -10,9 +10,15 @@
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-8">
-                    <img alt="{{ producto.nombre }}"
-                         class="img-fluid rounded shadow"
-                         src="{% if producto.imagen is empty %}https://placehold.it/1200x600?text=SIN%20IMAGEN{% else %}{{ producto.imagen }}{% endif %}">
+                    {% if producto.imagen is not empty %}
+                        <img alt="{{ producto.nombre }}"
+                             class="img-fluid rounded shadow"
+                             src="{{ producto.imagen }}">
+                    {% else %}
+                        <img alt="{{ producto.nombre }}"
+                             class="img-fluid rounded shadow"
+                             src="https://cdn-icons-png.flaticon.com/512/5617/5617585.png">
+                    {% endif %}
                 </div>
                 <div class="col-md-4">
                     <div class="text-center mb-4">

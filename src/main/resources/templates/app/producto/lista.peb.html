@@ -24,8 +24,15 @@
                     <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ producto.id }}"></button>
                     {% endif %}
                 </div>
-                <img src="{% if producto.imagen is empty %}http://placehold.it/350x260{% else %}{{ producto.imagen }}{% endif %}" 
-                     class="card-img-top" alt="{{ producto.nombre }}" style="height: 300px; object-fit: cover;">
+                {% if producto.imagen is not empty %}
+                    {% if producto.imagen starts with 'http' %}
+                        <img src="{{ producto.imagen }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 300px; object-fit: cover;">
+                    {% else %}
+                        <img src="{{ producto.imagen }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 300px; object-fit: cover;">
+                    {% endif %}
+                {% else %}
+                    <img src="https://cdn-icons-png.flaticon.com/512/5617/5617585.png" class="card-img-top" alt="Imagen por defecto" style="height: 300px; object-fit: cover;">
+                {% endif %}
                 <div class="card-footer bg-white">
                     <div class="row align-items-center">
                         <div class="col-4">

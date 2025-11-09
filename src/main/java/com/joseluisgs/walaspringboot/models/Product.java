@@ -7,6 +7,8 @@ import java.util.Objects;
 
 @Entity
 public class Product {
+    public static final String DEFAULT_IMAGE = "https://cdn-icons-png.flaticon.com/512/5617/5617585.png";
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

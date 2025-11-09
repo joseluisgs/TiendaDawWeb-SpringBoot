@@ -102,6 +102,10 @@ public class FileSystemStorageService implements StorageService{
 
     @Override
     public Path load(String filename) {
+        // Handle null or empty filename
+        if (filename == null || filename.trim().isEmpty()) {
+            return null;
+        }
         // Security: validate filename doesn't contain path traversal attempts
         if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
             throw new StorageException("Cannot load file with relative or absolute path: " + filename);
@@ -112,7 +116,16 @@ public class FileSystemStorageService implements StorageService{
     @Override
     public Resource loadAsResource(String filename) {
         try {
+            // Handle null or empty filename
+            if (filename == null || filename.trim().isEmpty()) {
+                throw new StorageFileNotFoundException("Filename is null or empty");
+            }
+            
             Path file = load(filename);
+            if (file == null) {
+                throw new StorageFileNotFoundException("Could not read file: " + filename);
+            }
+            
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() && resource.isReadable()) {
                 return resource;
