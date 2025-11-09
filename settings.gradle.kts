@@ -1,1 +1,1 @@
-rootProject.name = "walaspringboot"
+rootProject.name = "waladaw"

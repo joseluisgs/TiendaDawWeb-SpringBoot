@@ -2,7 +2,9 @@
 
 ## Introducción
 
-`GlobalControllerAdvice` es una clase anotada con `@ControllerAdvice` que permite inyectar automáticamente variables en **todas las vistas** del proyecto sin necesidad de añadirlas manualmente en cada controller. Esto es especialmente útil para información de autenticación, carrito de compras, y configuraciones globales.
+`GlobalControllerAdvice` es una clase anotada con `@ControllerAdvice` que permite inyectar automáticamente variables en
+**todas las vistas** del proyecto sin necesidad de añadirlas manualmente en cada controller. Esto es especialmente útil
+para información de autenticación, carrito de compras, y configuraciones globales.
 
 ## Ubicación
 
@@ -11,6 +13,7 @@
 ## ¿Qué hace @ControllerAdvice?
 
 `@ControllerAdvice` es una anotación de Spring que permite:
+
 - ✅ Inyectar atributos globales en todos los modelos
 - ✅ Manejar excepciones globalmente
 - ✅ Aplicar data binding global
@@ -20,15 +23,18 @@ En nuestro proyecto, lo usamos principalmente para **variables globales** median
 
 ## Variables Globales Disponibles
 
-Todas estas variables están disponibles en **todas las plantillas Pebble** del proyecto sin necesidad de configuración adicional.
+Todas estas variables están disponibles en **todas las plantillas Pebble** del proyecto sin necesidad de configuración
+adicional.
 
 ### 1. Variables de Autenticación
 
 #### `currentUser`
+
 **Tipo:** `User` o `null`  
 **Descripción:** Usuario actualmente autenticado
 
 **Uso en Pebble:**
+
 ```pebble
 {% if currentUser is not null %}
     <p>Bienvenido, {{ currentUser.nombre }} {{ currentUser.apellidos }}</p>
@@ -40,6 +46,7 @@ Todas estas variables están disponibles en **todas las plantillas Pebble** del 
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("currentUser")
 public User getCurrentUser(Authentication authentication) {
@@ -52,10 +59,12 @@ public User getCurrentUser(Authentication authentication) {
 ```
 
 #### `isAuthenticated`
+
 **Tipo:** `boolean`  
 **Descripción:** Indica si el usuario está autenticado
 
 **Uso en Pebble:**
+
 ```pebble
 {% if isAuthenticated %}
     <a href="/app/perfil">Mi Perfil</a>
@@ -67,6 +76,7 @@ public User getCurrentUser(Authentication authentication) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("isAuthenticated")
 public boolean isAuthenticated(Authentication authentication) {
@@ -76,10 +86,12 @@ public boolean isAuthenticated(Authentication authentication) {
 ```
 
 #### `isAdmin`
+
 **Tipo:** `boolean`  
 **Descripción:** Indica si el usuario tiene rol ADMIN
 
 **Uso en Pebble:**
+
 ```pebble
 {% if isAdmin %}
     <a href="/admin/dashboard" class="btn btn-danger">
@@ -105,6 +117,7 @@ public boolean isAuthenticated(Authentication authentication) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("isAdmin")
 public boolean isAdmin(Authentication authentication) {
@@ -118,10 +131,12 @@ public boolean isAdmin(Authentication authentication) {
 ```
 
 #### `username`
+
 **Tipo:** `String` o `null`  
 **Descripción:** Nombre completo del usuario autenticado
 
 **Uso en Pebble:**
+
 ```pebble
 {% if username %}
     <span class="navbar-text">
@@ -131,6 +146,7 @@ public boolean isAdmin(Authentication authentication) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("username")
 public String getUsername(Authentication authentication) {
@@ -144,10 +160,12 @@ public String getUsername(Authentication authentication) {
 ```
 
 #### `userRole`
+
 **Tipo:** `String` o `null`  
 **Descripción:** Rol del usuario autenticado (ADMIN, MODERATOR, USER)
 
 **Uso en Pebble:**
+
 ```pebble
 {% if userRole == 'ADMIN' %}
     <span class="badge bg-danger">Administrador</span>
@@ -159,6 +177,7 @@ public String getUsername(Authentication authentication) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("userRole")
 public String getUserRole(Authentication authentication) {
@@ -174,10 +193,12 @@ public String getUserRole(Authentication authentication) {
 ### 2. Variables del Carrito de Compras
 
 #### `cartItemCount`
+
 **Tipo:** `int`  
 **Descripción:** Número de productos en el carrito (cantidad total de items)
 
 **Uso en Pebble:**
+
 ```pebble
 {# Badge en el navbar #}
 <a class="nav-link" href="/app/carrito">
@@ -196,6 +217,7 @@ public String getUserRole(Authentication authentication) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("cartItemCount")
 public int getCartItemCount(HttpServletRequest request) {
@@ -209,10 +231,12 @@ public int getCartItemCount(HttpServletRequest request) {
 ```
 
 #### `cartTotal`
+
 **Tipo:** `Double`  
 **Descripción:** Precio total de todos los productos en el carrito
 
 **Uso en Pebble:**
+
 ```pebble
 {# Mostrar total en navbar #}
 {% if cartTotal > 0 %}
@@ -231,6 +255,7 @@ public int getCartItemCount(HttpServletRequest request) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("cartTotal")
 public Double getCartTotal(HttpServletRequest request) {
@@ -249,10 +274,12 @@ public Double getCartTotal(HttpServletRequest request) {
 ```
 
 #### `hasCartItems`
+
 **Tipo:** `boolean`  
 **Descripción:** Indica si hay productos en el carrito
 
 **Uso en Pebble:**
+
 ```pebble
 {% if hasCartItems %}
     <a href="/app/carrito/finalizar" class="btn btn-success">
@@ -266,6 +293,7 @@ public Double getCartTotal(HttpServletRequest request) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("hasCartItems")
 public boolean hasCartItems(HttpServletRequest request) {
@@ -274,16 +302,19 @@ public boolean hasCartItems(HttpServletRequest request) {
 ```
 
 #### `items_carrito`
+
 **Tipo:** `String`  
 **Descripción:** Versión string del contador del carrito (para compatibilidad)
 
 **Uso en Pebble:**
+
 ```pebble
 {# Alternativa a cartItemCount #}
 <span class="badge">{{ items_carrito }}</span>
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("items_carrito")
 public String itemsCarrito(HttpServletRequest request) {
@@ -295,10 +326,12 @@ public String itemsCarrito(HttpServletRequest request) {
 ### 3. Variables de Configuración Global
 
 #### `defaultImage`
+
 **Tipo:** `String`  
 **Descripción:** URL de la imagen por defecto para productos sin imagen
 
 **Uso en Pebble:**
+
 ```pebble
 <img src="{% if producto.imagen %}{{ producto.imagen }}{% else %}{{ defaultImage }}{% endif %}" 
      alt="{{ producto.nombre }}">
@@ -308,6 +341,7 @@ public String itemsCarrito(HttpServletRequest request) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("defaultImage")
 public String getDefaultImage() {
@@ -316,15 +350,18 @@ public String getDefaultImage() {
 ```
 
 #### `filesPath`
+
 **Tipo:** `String`  
 **Descripción:** Ruta base para archivos subidos
 
 **Uso en Pebble:**
+
 ```pebble
 <img src="{{ filesPath }}{{ producto.nombreArchivo }}" alt="Producto">
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("filesPath")
 public String getFilesPath() {
@@ -333,10 +370,12 @@ public String getFilesPath() {
 ```
 
 #### `appName`
+
 **Tipo:** `String`  
 **Descripción:** Nombre de la aplicación
 
 **Uso en Pebble:**
+
 ```pebble
 <title>{{ appName }} - {{ pageTitle | default('Marketplace') }}</title>
 
@@ -346,6 +385,7 @@ public String getFilesPath() {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("appName")
 public String getAppName() {
@@ -354,10 +394,12 @@ public String getAppName() {
 ```
 
 #### `currentDateTime`
+
 **Tipo:** `LocalDateTime`  
 **Descripción:** Fecha y hora actual del servidor
 
 **Uso en Pebble:**
+
 ```pebble
 <footer>
     <p>Generado el {{ currentDateTime | formatDate }}</p>
@@ -365,6 +407,7 @@ public String getAppName() {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("currentDateTime")
 public java.time.LocalDateTime getCurrentDateTime() {
@@ -375,10 +418,12 @@ public java.time.LocalDateTime getCurrentDateTime() {
 ### 4. Variables de CSRF
 
 #### `csrfToken`
+
 **Tipo:** `String`  
 **Descripción:** Token CSRF para protección contra ataques
 
 **Uso en Pebble:**
+
 ```pebble
 <form method="post" action="/app/producto/crear">
     <input type="hidden" name="{{ csrfParamName }}" value="{{ csrfToken }}">
@@ -387,6 +432,7 @@ public java.time.LocalDateTime getCurrentDateTime() {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("csrfToken")
 public String getCsrfToken(HttpServletRequest request) {
@@ -396,10 +442,12 @@ public String getCsrfToken(HttpServletRequest request) {
 ```
 
 #### `csrfParamName`
+
 **Tipo:** `String`  
 **Descripción:** Nombre del parámetro CSRF (normalmente "_csrf")
 
 **Uso en Pebble:**
+
 ```pebble
 <form method="post">
     <input type="hidden" name="{{ csrfParamName }}" value="{{ csrfToken }}">
@@ -407,6 +455,7 @@ public String getCsrfToken(HttpServletRequest request) {
 ```
 
 **Implementación:**
+
 ```java
 @ModelAttribute("csrfParamName")
 public String getCsrfParamName(HttpServletRequest request) {
@@ -420,9 +469,9 @@ public String getCsrfParamName(HttpServletRequest request) {
 ```java
 package com.joseluisgs.walaspringboot.controllers;
 
-import com.joseluisgs.walaspringboot.models.Product;
-import com.joseluisgs.walaspringboot.models.User;
-import com.joseluisgs.walaspringboot.services.ProductService;
+import models.dev.joseluisgs.walaspringboot.Product;
+import models.dev.joseluisgs.walaspringboot.User;
+import services.dev.joseluisgs.walaspringboot.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -440,7 +489,7 @@ public class GlobalControllerAdvice {
     private ProductService productService;
 
     // ⭐ AUTENTICACIÓN ⭐
-    
+
     @ModelAttribute("currentUser")
     public User getCurrentUser(Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()
@@ -487,7 +536,7 @@ public class GlobalControllerAdvice {
     }
 
     // ⭐ CSRF TOKENS ⭐
-    
+
     @ModelAttribute("csrfToken")
     public String getCsrfToken(HttpServletRequest request) {
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
@@ -501,7 +550,7 @@ public class GlobalControllerAdvice {
     }
 
     // ⭐ SHOPPING CART - DISPONIBLE EN TODAS LAS PÁGINAS ⭐
-    
+
     @ModelAttribute("cartItemCount")
     public int getCartItemCount(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -539,7 +588,7 @@ public class GlobalControllerAdvice {
     }
 
     // ⭐ VARIABLES GLOBALES ⭐
-    
+
     @ModelAttribute("defaultImage")
     public String getDefaultImage() {
         return Product.DEFAULT_IMAGE_URL;
@@ -713,6 +762,7 @@ public class GlobalControllerAdvice {
 ### 1. No Sobrecargar GlobalControllerAdvice
 
 ❌ **MALO: Demasiados @ModelAttribute**
+
 ```java
 @ModelAttribute("todoLosProductos")
 public List<Product> getTodosLosProductos() {
@@ -726,6 +776,7 @@ public EstadisticasDTO getEstadisticas() {
 ```
 
 ✅ **BUENO: Solo datos livianos y frecuentes**
+
 ```java
 @ModelAttribute("cartItemCount")
 public int getCartItemCount(HttpServletRequest request) {
@@ -742,6 +793,7 @@ public int getCartItemCount(HttpServletRequest request) {
 ### 2. Usar @ModelAttribute Solo para Datos Comunes
 
 **✅ Usar GlobalControllerAdvice para:**
+
 - Información de autenticación
 - Datos del carrito
 - Configuraciones globales
@@ -749,6 +801,7 @@ public int getCartItemCount(HttpServletRequest request) {
 - Variables usadas en layouts/fragments
 
 **❌ NO usar GlobalControllerAdvice para:**
+
 - Datos específicos de una sola vista
 - Queries pesadas a la base de datos
 - Cálculos complejos
@@ -777,13 +830,15 @@ public Double getCartTotal(HttpServletRequest request) {
 
 ### 4. Documentar las Variables
 
-Mantén documentación actualizada de todas las variables globales disponibles para que otros desarrolladores sepan qué pueden usar.
+Mantén documentación actualizada de todas las variables globales disponibles para que otros desarrolladores sepan qué
+pueden usar.
 
 ## Performance
 
 Las variables en `GlobalControllerAdvice` se calculan en **cada petición HTTP**. Para optimizar:
 
 1. **Cachear cuando sea apropiado:**
+
 ```java
 @Cacheable("appConfig")
 @ModelAttribute("appName")
@@ -793,6 +848,7 @@ public String getAppName() {
 ```
 
 2. **Usar sesión para datos del usuario:**
+
 ```java
 // Los datos de sesión ya están en memoria
 @ModelAttribute("cartItemCount")
@@ -803,6 +859,7 @@ public int getCartItemCount(HttpServletRequest request) {
 ```
 
 3. **Evitar N+1 queries:**
+
 ```java
 // ❌ MALO
 @ModelAttribute("cartProducts")
@@ -822,14 +879,18 @@ public int getCartItemCount(HttpServletRequest request) {
 ## Troubleshooting
 
 ### Problema: Variable no aparece en la vista
+
 **Solución:** Verificar que:
+
 1. El método está anotado con `@ModelAttribute`
 2. La clase tiene `@ControllerAdvice`
 3. El nombre del atributo coincide con el usado en la vista
 4. No hay excepciones en el método
 
 ### Problema: Performance lento
-**Solución:** 
+
+**Solución:**
+
 - Revisar queries en los `@ModelAttribute`
 - Usar lazy loading
 - Cachear datos estáticos
