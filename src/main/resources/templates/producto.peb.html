@@ -5,45 +5,61 @@
 <body class="d-flex flex-column min-vh-100">
 {% include "fragments/navbar" %}
 
-<div class="container mt-5 pt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="row">
-                <div class="col-md-8">
-                    <img alt="{{ producto.nombre }}"
-                         class="img-fluid rounded shadow"
-                         src="{{ producto.imagenOrDefault }}">
+<!-- Toast Notification Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div id="notificationToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5 pt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-white rounded shadow-sm p-3">
+            <li class="breadcrumb-item"><a href="/public" class="text-decoration-none"><i class="bi bi-house-door"></i> Inicio</a></li>
+            {% if producto.categoria is not null %}
+            <li class="breadcrumb-item"><a href="/public?categoria={{ producto.categoria.name() }}" class="text-decoration-none">{{ producto.categoria.emoji }} {{ producto.categoria.displayName }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ producto.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Product Image -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-lg border-0 product-image-card">
+                <img alt="{{ producto.nombre }}" 
+                     class="card-img-top product-image"
+                     src="{{ producto.imagenOrDefault }}"
+                     style="height: 500px; object-fit: cover; border-radius: 10px;">
+                <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge bg-dark bg-opacity-75 px-3 py-2">
+                        <i class="bi bi-eye"></i> {{ producto.views | default(0) }} vistas
+                    </span>
                 </div>
-                <div class="col-md-4">
-                    <div class="text-center mb-4">
-                        <img alt="Avatar"
-                             class="rounded-circle shadow" height="140"
-                             src="{% if producto.propietario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ producto.propietario.email }}.png{% else %}{{ producto.propietario.avatar }}{% endif %}"
-                             width="140">
-                        <h5 class="mt-3">{{ producto.propietario.nombre }} {{ producto.propietario.apellidos }}<br>
-                            <small class="text-muted">{{ producto.propietario.email }}</small>
-                        </h5>
-                    </div>
-                    <div class="mb-3">
-                        <h3>{{ producto.nombre }}</h3>
-                        {% if producto.categoria is not null %}
-                        <span class="badge bg-primary fs-6">{{ producto.categoria.emoji }} {{ producto.categoria.displayName }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="mb-3">
-                        <h4 class="text-primary"><strong>{{ producto.precio | formatPrice }}</strong></h4>
-                    </div>
-                    {% if producto.descripcion %}
-                    <div class="mb-3">
-                        <p class="text-muted">{{ producto.descripcion }}</p>
-                    </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-4">
+                    <!-- Product Title and Category -->
+                    <h1 class="display-5 fw-bold mb-3">{{ producto.nombre }}</h1>
+                    {% if producto.categoria is not null %}
+                    <span class="badge" style="font-size: 1.1rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        {{ producto.categoria.emoji }} {{ producto.categoria.displayName }}
+                    </span>
                     {% endif %}
-                    
+
                     <!-- Rating Display -->
-                    <div class="mb-3">
+                    <div class="my-4">
                         <div class="d-flex align-items-center">
                             {% if averageRating > 0 %}
-                            <div class="text-warning me-2">
+                            <div class="text-warning fs-5 me-2">
                                 {% for i in range(1, 6) %}
                                     {% if i <= averageRating %}
                                     <i class="bi bi-star-fill"></i>
@@ -54,99 +70,212 @@
                                     {% endif %}
                                 {% endfor %}
                             </div>
-                            <span class="text-muted">{{ averageRating }} ({{ ratingCount }} valoraciones)</span>
+                            <span class="text-muted fs-6">{{ averageRating }} ({{ ratingCount }} valoraciones)</span>
                             {% else %}
-                            <span class="text-muted"><i class="bi bi-star"></i> Sin valoraciones</span>
+                            <span class="text-muted"><i class="bi bi-star"></i> Sin valoraciones aún</span>
                             {% endif %}
                         </div>
                     </div>
-                    
+
+                    <!-- Price with Gradient -->
+                    <div class="price-container mb-4 p-4 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h2 class="display-4 fw-bold text-white mb-0">{{ producto.precio | formatPrice }}</h2>
+                    </div>
+
+                    <!-- Description -->
+                    {% if producto.descripcion %}
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2"><i class="bi bi-card-text"></i> Descripción</h5>
+                        <p class="text-muted">{{ producto.descripcion }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
                     {% if isAuthenticated and currentUser.email != producto.propietario.email %}
-                    <div class="d-grid gap-2">
-                        <a class="btn btn-lg btn-success" href="/app/carrito/add/{{ producto.id }}">
-                            <i class="bi bi-cart-plus"></i> {{ message('btn.buy') }}
-                        </a>
-                        <button class="btn btn-outline-danger" id="favoriteBtn" onclick="toggleFavorite({{ producto.id }})">
-                            <i class="bi bi-heart{% if isFavorite %}-fill{% endif %}" id="favoriteIcon"></i>
-                            <span id="favoriteText">{% if isFavorite %}{{ message('btn.remove.favorite') }}{% else %}{{ message('btn.add.favorite') }}{% endif %}</span>
+                    <div class="d-grid gap-3 mb-3">
+                        <button class="btn btn-success btn-lg shadow-sm hover-lift" onclick="addToCart({{ producto.id }})">
+                            <i class="bi bi-cart-plus"></i> Añadir al Carrito
                         </button>
+                        <button class="btn btn-outline-danger btn-lg shadow-sm hover-lift" id="favoriteBtn" onclick="toggleFavorite({{ producto.id }})">
+                            <i class="bi bi-heart{% if isFavorite %}-fill{% endif %}" id="favoriteIcon"></i>
+                            <span id="favoriteText">{% if isFavorite %}Quitar de Favoritos{% else %}Añadir a Favoritos{% endif %}</span>
+                        </button>
+                    </div>
+                    {% elseif isAuthenticated and currentUser.email == producto.propietario.email %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Este es tu producto. Puedes editarlo desde "Mis Productos".
                     </div>
                     {% endif %}
                 </div>
             </div>
-            
-            <!-- Rating Section -->
-            {% if isAuthenticated %}
-            <div class="row mt-5">
-                <div class="col-md-8">
-                    <div class="card shadow">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="bi bi-star"></i> {{ message('rating.title') }}</h5>
+
+            <!-- Seller Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-person-circle"></i> Vendedor</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <img alt="Avatar del vendedor"
+                             class="rounded-circle shadow me-3" 
+                             height="80" width="80"
+                             src="{% if producto.propietario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ producto.propietario.email }}.png{% else %}{{ producto.propietario.avatar }}{% endif %}">
+                        <div>
+                            <h5 class="mb-1 fw-bold">{{ producto.propietario.nombre }} {{ producto.propietario.apellidos }}</h5>
+                            <p class="text-muted mb-0 small"><i class="bi bi-envelope"></i> {{ producto.propietario.email }}</p>
                         </div>
-                        <div class="card-body">
-                            <!-- Rating Form -->
-                            {% if currentUser.email != producto.propietario.email %}
-                            <div class="mb-4 p-3 bg-light rounded">
-                                <h6>{{ message('rating.leave') }}:</h6>
-                                <form id="ratingForm">
-                                    <div class="mb-3">
-                                        <label class="form-label">{{ message('rating.score') }}:</label>
-                                        <div class="rating-input">
-                                            <input type="radio" name="rating" id="star5" value="5">
-                                            <label for="star5"><i class="bi bi-star-fill"></i></label>
-                                            <input type="radio" name="rating" id="star4" value="4">
-                                            <label for="star4"><i class="bi bi-star-fill"></i></label>
-                                            <input type="radio" name="rating" id="star3" value="3">
-                                            <label for="star3"><i class="bi bi-star-fill"></i></label>
-                                            <input type="radio" name="rating" id="star2" value="2">
-                                            <label for="star2"><i class="bi bi-star-fill"></i></label>
-                                            <input type="radio" name="rating" id="star1" value="1">
-                                            <label for="star1"><i class="bi bi-star-fill"></i></label>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="comentario" class="form-label">{{ message('rating.comment.optional') }}:</label>
-                                        <textarea class="form-control" id="comentario" rows="3" maxlength="500"></textarea>
-                                    </div>
-                                    <button type="button" class="btn btn-primary" onclick="submitRating({{ producto.id }})">
-                                        {{ message('btn.submit.rating') }}
-                                    </button>
-                                </form>
+                    </div>
+                    {% if isAuthenticated and currentUser.email != producto.propietario.email %}
+                    <a href="mailto:{{ producto.propietario.email }}" class="btn btn-primary btn-sm w-100 hover-lift">
+                        <i class="bi bi-envelope-fill"></i> Contactar Vendedor
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Section -->
+    {% if isAuthenticated %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h4 class="mb-0 text-white"><i class="bi bi-star-fill"></i> Valoraciones del Producto</h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Rating Form -->
+                    {% if currentUser.email != producto.propietario.email %}
+                    <div class="mb-5 p-4 rounded" style="background-color: #f8f9fa;">
+                        <h5 class="mb-3"><i class="bi bi-pencil-square"></i> Deja tu valoración</h5>
+                        <form id="ratingForm">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Puntuación:</label>
+                                <div class="rating-input">
+                                    <input type="radio" name="rating" id="star5" value="5">
+                                    <label for="star5"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="rating" id="star4" value="4">
+                                    <label for="star4"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="rating" id="star3" value="3">
+                                    <label for="star3"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="rating" id="star2" value="2">
+                                    <label for="star2"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="rating" id="star1" value="1">
+                                    <label for="star1"><i class="bi bi-star-fill"></i></label>
+                                </div>
                             </div>
-                            {% endif %}
-                            
-                            <!-- Ratings List -->
-                            <div id="ratingsList">
-                                <p class="text-muted">{{ message('rating.loading') | default('Cargando valoraciones...') }}</p>
+                            <div class="mb-3">
+                                <label for="comentario" class="form-label fw-bold">Comentario (opcional):</label>
+                                <textarea class="form-control" id="comentario" rows="3" maxlength="500" placeholder="Comparte tu experiencia con este producto..."></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-lg" onclick="submitRating({{ producto.id }})">
+                                <i class="bi bi-send-fill"></i> Enviar Valoración
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Ratings List -->
+                    <div id="ratingsList">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endif %}
         </div>
     </div>
+    {% endif %}
 </div>
 
 <style>
+/* Custom Animations and Styles */
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.product-image-card {
+    transition: transform 0.3s ease;
+}
+
+.product-image-card:hover {
+    transform: scale(1.02);
+}
+
+.product-image {
+    transition: transform 0.5s ease;
+}
+
+.product-image:hover {
+    transform: scale(1.05);
+}
+
 .rating-input {
     display: flex;
     flex-direction: row-reverse;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    gap: 0.25rem;
 }
+
 .rating-input input {
     display: none;
 }
+
 .rating-input label {
     cursor: pointer;
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: #ddd;
-    transition: color 0.2s;
+    transition: all 0.2s ease;
 }
+
 .rating-input label:hover,
 .rating-input label:hover ~ label,
 .rating-input input:checked ~ label {
     color: #ffc107;
+    transform: scale(1.1);
+}
+
+.price-container {
+    animation: pulse-price 2s ease-in-out infinite;
+}
+
+@keyframes pulse-price {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+    }
+}
+
+/* Toast Styles */
+.toast.show {
+    animation: slideInRight 0.5s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Breadcrumb Styles */
+.breadcrumb-item a {
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #667eea !important;
 }
 </style>
 
@@ -158,6 +287,7 @@
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+// Utility Functions
 function getCsrfToken() {
     return document.querySelector('meta[name="_csrf"]').getAttribute('content');
 }
@@ -166,10 +296,53 @@ function getCsrfParamName() {
     return document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 }
 
+function showNotification(message, type = 'success') {
+    const toast = document.getElementById('notificationToast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    
+    // Set color based on type
+    toast.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info');
+    if (type === 'success') {
+        toast.classList.add('bg-success');
+    } else if (type === 'error') {
+        toast.classList.add('bg-danger');
+    } else if (type === 'warning') {
+        toast.classList.add('bg-warning');
+    } else {
+        toast.classList.add('bg-info');
+    }
+    
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+// Add to Cart Function
+function addToCart(productoId) {
+    const btn = event.target.closest('button');
+    const originalContent = btn.innerHTML;
+    
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Agregando...';
+    
+    // Redirect to add to cart
+    window.location.href = `/app/carrito/add/${productoId}`;
+}
+
+// Toggle Favorite Function
 function toggleFavorite(productoId) {
-    const isFavorite = document.getElementById('favoriteIcon').classList.contains('bi-heart-fill');
+    const icon = document.getElementById('favoriteIcon');
+    const text = document.getElementById('favoriteText');
+    const btn = document.getElementById('favoriteBtn');
+    
+    const isFavorite = icon.classList.contains('bi-heart-fill');
     const method = isFavorite ? 'DELETE' : 'POST';
     const url = isFavorite ? `/app/favoritos/remove/${productoId}` : `/app/favoritos/add/${productoId}`;
+    
+    // Disable button during request
+    btn.disabled = true;
     
     const formData = new FormData();
     formData.append(getCsrfParamName(), getCsrfToken());
@@ -181,34 +354,37 @@ function toggleFavorite(productoId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const icon = document.getElementById('favoriteIcon');
-            const text = document.getElementById('favoriteText');
-            
             if (data.isFavorite) {
                 icon.classList.remove('bi-heart');
                 icon.classList.add('bi-heart-fill');
-                text.textContent = '{{ message('btn.remove.favorite') }}';
+                text.textContent = 'Quitar de Favoritos';
+                showNotification('¡Producto añadido a favoritos!', 'success');
             } else {
                 icon.classList.remove('bi-heart-fill');
                 icon.classList.add('bi-heart');
-                text.textContent = '{{ message('btn.add.favorite') }}';
+                text.textContent = 'Añadir a Favoritos';
+                showNotification('Producto quitado de favoritos', 'info');
             }
         } else {
-            alert('Error: ' + data.message);
+            showNotification('Error: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al procesar la solicitud');
+        showNotification('Error al procesar la solicitud', 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
     });
 }
 
+// Submit Rating Function
 function submitRating(productoId) {
     const rating = document.querySelector('input[name="rating"]:checked');
     const comentario = document.getElementById('comentario').value;
     
     if (!rating) {
-        alert('Por favor, selecciona una puntuación');
+        showNotification('Por favor, selecciona una puntuación', 'warning');
         return;
     }
     
@@ -227,50 +403,62 @@ function submitRating(productoId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('{{ message('rating.success') }}');
+            showNotification('¡Valoración enviada correctamente!', 'success');
             document.getElementById('ratingForm').reset();
             loadRatings(productoId);
-            // Actualizar el promedio en la página
-            location.reload();
+            // Reload after 2 seconds to update average rating
+            setTimeout(() => location.reload(), 2000);
         } else {
-            alert('Error: ' + data.message);
+            showNotification('Error: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al enviar la valoración');
+        showNotification('Error al enviar la valoración', 'error');
     });
 }
 
+// Load Ratings Function
 function loadRatings(productoId) {
     fetch(`/app/ratings/producto/${productoId}`)
     .then(response => response.json())
     .then(data => {
         const ratingsList = document.getElementById('ratingsList');
         if (data.success && data.ratings && data.ratings.length > 0) {
-            let html = '';
+            let html = '<h5 class="mb-4"><i class="bi bi-chat-left-text"></i> Comentarios de usuarios</h5>';
             data.ratings.forEach(rating => {
                 html += `
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="text-warning me-2">
-                                ${'<i class="bi bi-star-fill"></i>'.repeat(rating.puntuacion)}
-                                ${'<i class="bi bi-star"></i>'.repeat(5 - rating.puntuacion)}
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="text-warning fs-5 me-3">
+                                    ${'<i class="bi bi-star-fill"></i>'.repeat(rating.puntuacion)}
+                                    ${'<i class="bi bi-star"></i>'.repeat(5 - rating.puntuacion)}
+                                </div>
+                                <strong>${rating.usuario ? rating.usuario.nombre : 'Usuario'}</strong>
                             </div>
-                            <small class="text-muted">${rating.usuario ? rating.usuario.nombre : 'Usuario'}</small>
+                            ${rating.comentario ? `<p class="mb-0 text-muted">${rating.comentario}</p>` : '<p class="mb-0 text-muted fst-italic">Sin comentario</p>'}
                         </div>
-                        ${rating.comentario ? `<p class="mb-0">${rating.comentario}</p>` : ''}
                     </div>
                 `;
             });
             ratingsList.innerHTML = html;
         } else {
-            ratingsList.innerHTML = '<p class="text-muted">{{ message('rating.no.ratings') }}</p>';
+            ratingsList.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-chat-left-dots display-1 text-muted"></i>
+                    <p class="text-muted mt-3">No hay valoraciones todavía. ¡Sé el primero en valorar este producto!</p>
+                </div>
+            `;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        document.getElementById('ratingsList').innerHTML = '<p class="text-muted">{{ message('error.generic') }}</p>';
+        document.getElementById('ratingsList').innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> Error al cargar las valoraciones
+            </div>
+        `;
     });
 }
 

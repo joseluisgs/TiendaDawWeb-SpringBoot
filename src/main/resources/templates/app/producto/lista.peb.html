@@ -83,41 +83,41 @@
         {% for producto in misproductos %}
         <div class="col">
             <div class="card h-100 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <div class="d-flex flex-column">
-                        <span>{{ producto.nombre }}</span>
+                        <span class="fw-bold">{{ producto.nombre }}</span>
                         {% if producto.categoria is not null %}
                         <span class="badge bg-info mt-1" style="width: fit-content;">{{ producto.categoria.emoji }} {{ producto.categoria.displayName }}</span>
                         {% endif %}
                     </div>
-                    {% if producto.compra is null %}
-                    <button class="btn-close" data-bs-target="#deleteModal" data-bs-toggle="modal" data-id="{{ producto.id }}"
-                            type="button"></button>
-                    {% endif %}
                 </div>
                 <img alt="{{ producto.nombre }}" class="card-img-top" 
                      src="{{ producto.imagenOrDefault }}"
                      style="height: 300px; object-fit: cover;">
                 <div class="card-footer bg-white">
-                    <div class="row align-items-center">
-                        <div class="col-4">
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 text-primary">{{ producto.precio | formatPrice }}</h5>
-                        </div>
-                        <div class="col-4 text-center">
                             {% if producto.compra is not null %}
                             <span class="badge bg-success">Vendido</span>
                             {% else %}
                             <span class="badge bg-info">Sin vender</span>
                             {% endif %}
                         </div>
-                        <div class="col-4 text-end">
-                            {% if producto.compra is null %}
-                            <a class="btn btn-warning btn-sm" href="/app/misproductos/editar/{{ producto.id }}">
-                                <i class="bi bi-pencil"></i> Editar
-                            </a>
-                            {% endif %}
-                        </div>
                     </div>
+                    {% if producto.compra is null %}
+                    <div class="d-flex gap-2 justify-content-between">
+                        <a class="btn btn-primary btn-sm flex-fill" href="/public/producto/{{ producto.id }}" title="Ver producto">
+                            👁️ Ver
+                        </a>
+                        <a class="btn btn-warning btn-sm flex-fill" href="/app/misproductos/editar/{{ producto.id }}" title="Editar producto">
+                            ✏️ Editar
+                        </a>
+                        <button class="btn btn-danger btn-sm flex-fill" data-bs-target="#deleteModal" data-bs-toggle="modal" data-id="{{ producto.id }}" type="button" title="Borrar producto">
+                            🗑️ Borrar
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -45,6 +45,9 @@ public class Product {
     @Column(name = "deleted_by")
     private String deletedBy;
 
+    @Column(name = "views", nullable = false)
+    private Long views = 0L;
+
     public Product() {
     }
 
@@ -166,6 +169,18 @@ public class Product {
 
     public boolean isActive() {
         return !deleted;
+    }
+
+    public Long getViews() {
+        return views;
+    }
+
+    public void setViews(Long views) {
+        this.views = views;
+    }
+
+    public void incrementViews() {
+        this.views = this.views + 1;
     }
 
     /**

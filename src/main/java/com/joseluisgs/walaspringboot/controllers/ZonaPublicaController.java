@@ -112,6 +112,9 @@ public class ZonaPublicaController {
         //Buscamos pro id
         Product result = productoServicio.findById(id);
         if (result != null) {
+            // Incrementar vistas automáticamente
+            productoServicio.incrementarVistas(id);
+            
             // Si lo encotramos lo añadimos al modelo y se lo pasamos
             model.addAttribute("producto", result);
             

@@ -158,4 +158,13 @@ public class ProductService {
     public Page<Product> findByAllFiltersActivePaginated(String nombre, ProductCategory categoria, Long propietarioId, Pageable pageable) {
         return repositorio.findByAllFiltersActivePaginated(nombre, categoria, propietarioId, pageable);
     }
+    
+    @CacheEvict(value = "productos", allEntries = true)
+    public void incrementarVistas(Long id) {
+        Product product = findById(id);
+        if (product != null) {
+            product.incrementViews();
+            repositorio.save(product);
+        }
+    }
 }
