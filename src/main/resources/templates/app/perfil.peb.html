@@ -20,6 +20,58 @@
                     </div>
                     {% endif %}
 
+                    <!-- Vendor Card Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card vendor-card shadow">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Tu perfil como vendedor</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <!-- Avatar usuario -->
+                                    <div class="mb-3">
+                                        <img alt="Avatar" 
+                                             class="rounded-circle border border-3 border-primary" 
+                                             src="{% if usuario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ usuario.email }}.png{% else %}{{ usuario.avatar }}{% endif %}" 
+                                             style="width: 100px; height: 100px; object-fit: cover;">
+                                    </div>
+                                    
+                                    <!-- Nombre completo -->
+                                    <h4 class="fw-bold text-primary">{{ usuario.nombre }} {{ usuario.apellidos }}</h4>
+                                    <p class="text-muted">Miembro desde {{ usuario.fechaAlta | date('MMMM yyyy') }}</p>
+                                    
+                                    <!-- Valoración vendedor -->
+                                    <div class="mb-4">
+                                        <h6>Valoración del vendedor:</h6>
+                                        <div class="mb-2">
+                                            <span class="text-warning fs-5">
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-half"></i>
+                                            </span>
+                                            <strong class="ms-2 fs-4">4.7</strong>
+                                        </div>
+                                        <small class="text-muted">(89 opiniones)</small>
+                                    </div>
+                                    
+                                    <!-- Estadísticas -->
+                                    <div class="row text-center">
+                                        <div class="col-6 border-end">
+                                            <strong class="d-block text-primary fs-3">45</strong>
+                                            <small class="text-muted">Productos</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong class="d-block text-success fs-3">32</strong>
+                                            <small class="text-muted">Ventas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row mb-4">
                         <div class="col-md-4 text-center">
                             <img alt="Avatar" 

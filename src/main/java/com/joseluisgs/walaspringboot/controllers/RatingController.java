@@ -43,6 +43,13 @@ public class RatingController {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            // Check if user already rated this product
+            if (ratingService.yaValorado(usuario.getId(), productoId)) {
+                response.put("success", false);
+                response.put("message", "Ya has valorado este producto");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
             Rating rating = ratingService.addRating(usuario, productoId, puntuacion, comentario);
             if (rating != null) {
                 response.put("success", true);
