@@ -9,6 +9,8 @@ import com.joseluisgs.walaspringboot.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -105,5 +107,22 @@ public class ProductService {
     @Cacheable(value = "productos", key = "'categoria_' + #categoria.name()")
     public List<Product> findByCategoria(ProductCategory categoria) {
         return repositorio.findByCategoria(categoria);
+    }
+
+    // Pagination methods
+    public Page<Product> findAll(Pageable pageable) {
+        return repositorio.findByDeletedFalseAndCompraIsNull(pageable);
+    }
+
+    public Page<Product> findByCategoria(ProductCategory categoria, Pageable pageable) {
+        return repositorio.findByCategoriaAndDeletedFalseAndCompraIsNull(categoria, pageable);
+    }
+
+    public Page<Product> findByNombreContainingIgnoreCase(String nombre, Pageable pageable) {
+        return repositorio.findByNombreContainingIgnoreCaseAndDeletedFalseAndCompraIsNull(nombre, pageable);
+    }
+
+    public Page<Product> findByPrecioBetween(Float min, Float max, Pageable pageable) {
+        return repositorio.findByPrecioBetweenAndDeletedFalseAndCompraIsNull(min, max, pageable);
     }
 }

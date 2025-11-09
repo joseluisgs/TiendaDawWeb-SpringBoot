@@ -4,6 +4,8 @@ import com.joseluisgs.walaspringboot.models.Purchase;
 import com.joseluisgs.walaspringboot.models.Product;
 import com.joseluisgs.walaspringboot.models.ProductCategory;
 import com.joseluisgs.walaspringboot.models.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,4 +38,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.nombre LIKE %:search% AND p.deleted = false")
     List<Product> findByNombreContainingActive(@Param("search") String search);
+
+    // Pagination methods
+    @Query("SELECT p FROM Product p WHERE p.deleted = false AND p.compra IS NULL ORDER BY p.id DESC")
+    Page<Product> findByDeletedFalseAndCompraIsNull(Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.categoria = :categoria AND p.deleted = false AND p.compra IS NULL ORDER BY p.id DESC")
+    Page<Product> findByCategoriaAndDeletedFalseAndCompraIsNull(@Param("categoria") ProductCategory categoria, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.deleted = false AND p.compra IS NULL ORDER BY p.id DESC")
+    Page<Product> findByNombreContainingIgnoreCaseAndDeletedFalseAndCompraIsNull(@Param("nombre") String nombre, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.precio BETWEEN :min AND :max AND p.deleted = false AND p.compra IS NULL ORDER BY p.id DESC")
+    Page<Product> findByPrecioBetweenAndDeletedFalseAndCompraIsNull(@Param("min") Float min, @Param("max") Float max, Pageable pageable);
 }
