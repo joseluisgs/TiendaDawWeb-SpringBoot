@@ -90,7 +90,7 @@ public class PurchaseController {
     }
 
     // Muestro las compras asociadas al email que se ha registrado en la sesión
-    @ModelAttribute("mis_compras")
+    @ModelAttribute("miscompras")
     public List<Purchase> misCompras() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         usuario = usuarioServicio.buscarPorEmail(email);
@@ -218,8 +218,8 @@ public class PurchaseController {
         return "/app/compra/factura";
     }
 
-    // Saco una factura en PDF usando itex
-    @RequestMapping(value = "/miscompras/factura/pdf/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+    // Saco una factura en PDF usando itex - Route standardized to /miscompras/factura/{id}/pdf
+    @RequestMapping(value = {"/miscompras/factura/{id}/pdf", "/miscompras/factura/pdf/{id}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<InputStreamResource> facturaPDF(@PathVariable Long id) {
         // Recupero la compra mediante su ID
         Purchase compra = compraServicio.buscarPorId(id);
@@ -240,8 +240,8 @@ public class PurchaseController {
                 .body(new InputStreamResource(bis));
     }
 
-    // Saco la factura generada con el servicio, le cambio el PATH
-    @RequestMapping(value = "/miscompras/pdf/factura/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+    // Saco la factura generada con el servicio HTML2PDF - Alternative beautiful PDF
+    @RequestMapping(value = {"/miscompras/factura/{id}/html2pdf", "/miscompras/pdf/factura/{id}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity facturaHTML2PDF(@PathVariable Long id) {
         // Cargamos los datos
         // Recupero la compra mediante su ID
