@@ -380,7 +380,7 @@ function getCsrfToken() {
 }
 
 function getCsrfParamName() {
-    return document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    return document.querySelector('meta[name="_csrf_param"]').getAttribute('content');
 }
 
 function showNotification(message, type = 'success') {
