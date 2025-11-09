@@ -96,7 +96,7 @@ public class DataFactory {
                         "iPhone 14 en azul, 128GB. Batería excelente, pantalla perfecta. Incluye cargador y funda original.",
                         "Smartphones", david),
                 new Product("Nothing Phone 2", 599.0f,
-                        "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400",
+                        "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400",
                         "Diseño transparente único con Glyph Interface. Android puro y rendimiento excepcional.",
                         "Smartphones", laura),
                 new Product("Samsung Galaxy Z Flip 5", 999.0f,
@@ -224,7 +224,7 @@ public class DataFactory {
                         "Cargador inalámbrico MagSafe original + soporte + cable USB-C. Carga rápida garantizada.",
                         "Accessories", maria),
                 new Product("Anker PowerCore", 45.0f,
-                        "https://images.unsplash.com/photo-1567721913486-6585f069b332?w=400",
+                        "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400",
                         "Batería portátil 20.000mAh con carga rápida PD. Ideal para viajes y emergencias energéticas.",
                         "Accessories", carlos),
                 new Product("Samsung Galaxy Watch", 289.0f,
@@ -240,7 +240,7 @@ public class DataFactory {
                         "Cámara web 4K con autoenfoque, ideal para streaming y videoconferencias profesionales.",
                         "Accessories", laura),
                 new Product("Wireless Charger Stand", 39.0f,
-                        "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400",
+                        "https://images.unsplash.com/photo-1591290619762-9024626fd9b2?w=400",
                         "Soporte cargador inalámbrico con ventilador de refrigeración. Compatible con todos los estándares Qi.",
                         "Accessories", javier)
         );

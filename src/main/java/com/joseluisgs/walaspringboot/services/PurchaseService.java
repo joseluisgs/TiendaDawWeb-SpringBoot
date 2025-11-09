@@ -7,10 +7,13 @@ import com.joseluisgs.walaspringboot.repositories.PurchaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -81,5 +84,22 @@ public class PurchaseService {
     @Transactional(readOnly = true)
     public List<Purchase> findByPropietarioWithProducts(User propietario) {
         return repositorio.findByPropietarioWithProducts(propietario);
+    }
+    
+    // Pagination methods
+    public Page<Purchase> findAllPaginated(Pageable pageable) {
+        return repositorio.findAllPaginated(pageable);
+    }
+    
+    public Page<Purchase> findByFechaCompraBetween(LocalDate desde, LocalDate hasta, Pageable pageable) {
+        return repositorio.findByFechaCompraBetween(desde, hasta, pageable);
+    }
+    
+    public Page<Purchase> findByPropietarioIdPaginated(Long propietarioId, Pageable pageable) {
+        return repositorio.findByPropietarioIdPaginated(propietarioId, pageable);
+    }
+    
+    public Page<Purchase> findByFechaCompraAndPropietario(LocalDate desde, LocalDate hasta, Long propietarioId, Pageable pageable) {
+        return repositorio.findByFechaCompraAndPropietario(desde, hasta, propietarioId, pageable);
     }
 }

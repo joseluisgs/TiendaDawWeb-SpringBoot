@@ -5,6 +5,8 @@ import com.joseluisgs.walaspringboot.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -65,5 +67,22 @@ public class UserService {
     
     public Optional<User> findByEmail(String email) {
         return Optional.ofNullable(buscarPorEmail(email));
+    }
+    
+    // Pagination methods
+    public Page<User> findAllPaginated(Pageable pageable) {
+        return repositorio.findAllActivePaginated(pageable);
+    }
+    
+    public Page<User> findBySearchPaginated(String search, Pageable pageable) {
+        return repositorio.findBySearchActivePaginated(search, pageable);
+    }
+    
+    public Page<User> findByRolPaginated(String rol, Pageable pageable) {
+        return repositorio.findByRolActivePaginated(rol, pageable);
+    }
+    
+    public Page<User> findBySearchAndRolPaginated(String search, String rol, Pageable pageable) {
+        return repositorio.findBySearchAndRolActivePaginated(search, rol, pageable);
     }
 }

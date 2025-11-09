@@ -19,8 +19,38 @@
         </div>
     </div>
 
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="/admin/usuarios" class="row g-3" method="get">
+                <div class="col-md-6">
+                    <label class="form-label">Buscar usuario</label>
+                    <input class="form-control" name="q" placeholder="Buscar por nombre, apellidos o email" type="text"
+                           value="{{ q | default('') }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Filtrar por rol</label>
+                    <select class="form-select" name="rol">
+                        <option value="">Todos los roles</option>
+                        <option value="ADMIN" {% if rolActual == 'ADMIN' %}selected{% endif %}>ADMIN</option>
+                        <option value="MODERATOR" {% if rolActual == 'MODERATOR' %}selected{% endif %}>MODERATOR</option>
+                        <option value="USER" {% if rolActual == 'USER' %}selected{% endif %}>USER</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
+            {% if usuarios is empty %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No se encontraron usuarios con los criterios especificados
+            </div>
+            {% else %}
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead class="table-dark">
@@ -64,6 +94,64 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination Controls -->
+            {% if totalPages > 1 %}
+            <nav aria-label="Navegación de usuarios" class="mt-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-0">
+                            {% set endItem = (currentPage + 1) * size %}
+                            Mostrando {{ (currentPage * size) + 1 }} a {% if endItem > totalElements %}{{ totalElements }}{% else %}{{ endItem }}{% endif %} 
+                            de {{ totalElements }} usuarios
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="pagination justify-content-end mb-0">
+                            <!-- Página anterior -->
+                            {% if hasPrevious %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if rolActual %}rol={{ rolActual }}&{% endif %}page={{ currentPage - 1 }}&size={{ size }}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-left"></i> Anterior</span>
+                            </li>
+                            {% endif %}
+
+                            <!-- Números de página -->
+                            {% for i in range(0, totalPages) %}
+                                {% if i == currentPage %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i + 1 }}</span>
+                                </li>
+                                {% elseif i >= (currentPage - 2) and i <= (currentPage + 2) %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if rolActual %}rol={{ rolActual }}&{% endif %}page={{ i }}&size={{ size }}">{{ i + 1 }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- Página siguiente -->
+                            {% if hasNext %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if rolActual %}rol={{ rolActual }}&{% endif %}page={{ currentPage + 1 }}&size={{ size }}">
+                                    Siguiente <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Siguiente <i class="bi bi-chevron-right"></i></span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            {% endif %}
+            {% endif %}
         </div>
     </div>
 </div>

@@ -97,7 +97,8 @@
         <div class="row align-items-center">
             <div class="col-md-6">
                 <p class="text-muted mb-0">
-                    Mostrando {{ (currentPage * size) + 1 }} a {{ [((currentPage + 1) * size), totalElements] | min }} 
+                    {% set endItem = (currentPage + 1) * size %}
+                    Mostrando {{ (currentPage * size) + 1 }} a {% if endItem > totalElements %}{{ totalElements }}{% else %}{{ endItem }}{% endif %} 
                     de {{ totalElements }} productos
                 </p>
             </div>

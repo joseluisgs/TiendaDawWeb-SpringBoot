@@ -125,4 +125,37 @@ public class ProductService {
     public Page<Product> findByPrecioBetween(Float min, Float max, Pageable pageable) {
         return repositorio.findByPrecioBetweenAndDeletedFalseAndCompraIsNull(min, max, pageable);
     }
+    
+    // Admin pagination methods
+    public Page<Product> findAllActivePaginated(Pageable pageable) {
+        return repositorio.findAllActivePaginated(pageable);
+    }
+    
+    public Page<Product> findByNombreContainingActivePaginated(String nombre, Pageable pageable) {
+        return repositorio.findByNombreContainingActivePaginated(nombre, pageable);
+    }
+    
+    public Page<Product> findByCategoriaActivePaginated(ProductCategory categoria, Pageable pageable) {
+        return repositorio.findByCategoriaActivePaginated(categoria, pageable);
+    }
+    
+    public Page<Product> findByPropietarioIdActivePaginated(Long propietarioId, Pageable pageable) {
+        return repositorio.findByPropietarioIdActivePaginated(propietarioId, pageable);
+    }
+    
+    public Page<Product> findByNombreAndCategoriaActivePaginated(String nombre, ProductCategory categoria, Pageable pageable) {
+        return repositorio.findByNombreAndCategoriaActivePaginated(nombre, categoria, pageable);
+    }
+    
+    public Page<Product> findByNombreAndPropietarioActivePaginated(String nombre, Long propietarioId, Pageable pageable) {
+        return repositorio.findByNombreAndPropietarioActivePaginated(nombre, propietarioId, pageable);
+    }
+    
+    public Page<Product> findByCategoriaAndPropietarioActivePaginated(ProductCategory categoria, Long propietarioId, Pageable pageable) {
+        return repositorio.findByCategoriaAndPropietarioActivePaginated(categoria, propietarioId, pageable);
+    }
+    
+    public Page<Product> findByAllFiltersActivePaginated(String nombre, ProductCategory categoria, Long propietarioId, Pageable pageable) {
+        return repositorio.findByAllFiltersActivePaginated(nombre, categoria, propietarioId, pageable);
+    }
 }

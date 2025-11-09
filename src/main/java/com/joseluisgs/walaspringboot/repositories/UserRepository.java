@@ -1,6 +1,8 @@
 package com.joseluisgs.walaspringboot.repositories;
 
 import com.joseluisgs.walaspringboot.models.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +24,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE (u.nombre LIKE %:search% OR u.apellidos LIKE %:search% OR u.email LIKE %:search%) AND u.deleted = false")
     List<User> findBySearchActive(@Param("search") String search);
+    
+    // Pagination methods
+    @Query("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.id DESC")
+    Page<User> findAllActivePaginated(Pageable pageable);
+    
+    @Query("SELECT u FROM User u WHERE (LOWER(u.nombre) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.apellidos) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND u.deleted = false ORDER BY u.id DESC")
+    Page<User> findBySearchActivePaginated(@Param("search") String search, Pageable pageable);
+    
+    @Query("SELECT u FROM User u WHERE u.rol = :rol AND u.deleted = false ORDER BY u.id DESC")
+    Page<User> findByRolActivePaginated(@Param("rol") String rol, Pageable pageable);
+    
+    @Query("SELECT u FROM User u WHERE (LOWER(u.nombre) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.apellidos) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND u.rol = :rol AND u.deleted = false ORDER BY u.id DESC")
+    Page<User> findBySearchAndRolActivePaginated(@Param("search") String search, @Param("rol") String rol, Pageable pageable);
 }

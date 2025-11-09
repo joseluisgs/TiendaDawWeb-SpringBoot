@@ -51,4 +51,29 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.precio BETWEEN :min AND :max AND p.deleted = false AND p.compra IS NULL ORDER BY p.id DESC")
     Page<Product> findByPrecioBetweenAndDeletedFalseAndCompraIsNull(@Param("min") Float min, @Param("max") Float max, Pageable pageable);
+    
+    // Admin pagination methods (includes all products, not just unsold)
+    @Query("SELECT p FROM Product p WHERE p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findAllActivePaginated(Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByNombreContainingActivePaginated(@Param("nombre") String nombre, Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE p.categoria = :categoria AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByCategoriaActivePaginated(@Param("categoria") ProductCategory categoria, Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE p.propietario.id = :propietarioId AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByPropietarioIdActivePaginated(@Param("propietarioId") Long propietarioId, Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.categoria = :categoria AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByNombreAndCategoriaActivePaginated(@Param("nombre") String nombre, @Param("categoria") ProductCategory categoria, Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.propietario.id = :propietarioId AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByNombreAndPropietarioActivePaginated(@Param("nombre") String nombre, @Param("propietarioId") Long propietarioId, Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE p.categoria = :categoria AND p.propietario.id = :propietarioId AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByCategoriaAndPropietarioActivePaginated(@Param("categoria") ProductCategory categoria, @Param("propietarioId") Long propietarioId, Pageable pageable);
+    
+    @Query("SELECT p FROM Product p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')) AND p.categoria = :categoria AND p.propietario.id = :propietarioId AND p.deleted = false ORDER BY p.id DESC")
+    Page<Product> findByAllFiltersActivePaginated(@Param("nombre") String nombre, @Param("categoria") ProductCategory categoria, @Param("propietarioId") Long propietarioId, Pageable pageable);
 }
