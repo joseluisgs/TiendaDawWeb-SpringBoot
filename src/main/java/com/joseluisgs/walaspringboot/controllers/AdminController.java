@@ -275,7 +275,7 @@ public class AdminController {
         }
         
         // Calcular estadísticas del dashboard (sobre todas las compras, no solo la página actual)
-        var todasCompras = compraServicio.findAll();
+        var todasCompras = compraServicio.findAllWithProducts();
         Double totalVentas = todasCompras.stream()
             .mapToDouble(com.joseluisgs.walaspringboot.models.Purchase::getTotal)
             .sum();

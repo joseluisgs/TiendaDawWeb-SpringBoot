@@ -80,6 +80,12 @@ public class GlobalControllerAdvice {
         return csrfToken != null ? csrfToken.getParameterName() : "_csrf";
     }
 
+    @ModelAttribute("csrfHeaderName")
+    public String getCsrfHeaderName(HttpServletRequest request) {
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        return csrfToken != null ? csrfToken.getHeaderName() : "X-CSRF-TOKEN";
+    }
+
     // ⭐ SHOPPING CART INFORMATION - FOR ALL PAGES ⭐
     @ModelAttribute("cartItemCount")
     public int getCartItemCount(HttpServletRequest request) {

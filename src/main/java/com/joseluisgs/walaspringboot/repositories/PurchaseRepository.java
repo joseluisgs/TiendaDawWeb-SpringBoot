@@ -32,16 +32,16 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     @Query("SELECT DISTINCT p FROM Purchase p LEFT JOIN FETCH p.productos WHERE p.propietario = :propietario ORDER BY p.fechaCompra DESC")
     List<Purchase> findByPropietarioWithProducts(@Param("propietario") User propietario);
     
-    // Pagination methods
-    @Query("SELECT p FROM Purchase p ORDER BY p.fechaCompra DESC")
+    // Pagination methods with JOIN FETCH to avoid LazyInitializationException
+    @Query("SELECT DISTINCT p FROM Purchase p LEFT JOIN FETCH p.productos ORDER BY p.fechaCompra DESC")
     Page<Purchase> findAllPaginated(Pageable pageable);
     
-    @Query("SELECT p FROM Purchase p WHERE CAST(p.fechaCompra AS date) BETWEEN :desde AND :hasta ORDER BY p.fechaCompra DESC")
+    @Query("SELECT DISTINCT p FROM Purchase p LEFT JOIN FETCH p.productos WHERE CAST(p.fechaCompra AS date) BETWEEN :desde AND :hasta ORDER BY p.fechaCompra DESC")
     Page<Purchase> findByFechaCompraBetween(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, Pageable pageable);
     
-    @Query("SELECT p FROM Purchase p WHERE p.propietario.id = :propietarioId ORDER BY p.fechaCompra DESC")
+    @Query("SELECT DISTINCT p FROM Purchase p LEFT JOIN FETCH p.productos WHERE p.propietario.id = :propietarioId ORDER BY p.fechaCompra DESC")
     Page<Purchase> findByPropietarioIdPaginated(@Param("propietarioId") Long propietarioId, Pageable pageable);
     
-    @Query("SELECT p FROM Purchase p WHERE CAST(p.fechaCompra AS date) BETWEEN :desde AND :hasta AND p.propietario.id = :propietarioId ORDER BY p.fechaCompra DESC")
+    @Query("SELECT DISTINCT p FROM Purchase p LEFT JOIN FETCH p.productos WHERE CAST(p.fechaCompra AS date) BETWEEN :desde AND :hasta AND p.propietario.id = :propietarioId ORDER BY p.fechaCompra DESC")
     Page<Purchase> findByFechaCompraAndPropietario(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, @Param("propietarioId") Long propietarioId, Pageable pageable);
 }
