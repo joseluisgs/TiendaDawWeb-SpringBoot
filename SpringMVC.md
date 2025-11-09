@@ -2173,6 +2173,684 @@ public class ProductoDTO {
 }
 ```
 
+## CSRF Protection Patterns
+
+La protección CSRF (Cross-Site Request Forgery) es fundamental en aplicaciones web. Spring Security la habilita por defecto.
+
+### Patrón LoginController (Funcional)
+
+Este patrón añade manualmente el token CSRF al modelo en cada petición GET:
+
+```java
+@Controller
+@RequestMapping("/auth")
+public class LoginController {
+    
+    @GetMapping("/login")
+    public String login(Model model, HttpServletRequest request) {
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (csrfToken != null) {
+            model.addAttribute("csrfToken", csrfToken.getToken());
+            model.addAttribute("csrfParamName", csrfToken.getParameterName());
+        }
+        return "login";
+    }
+}
+```
+
+**Uso en template:**
+```html
+<form method="post" action="/auth/login">
+    <input type="hidden" name="{{ csrfParamName }}" value="{{ csrfToken }}"/>
+    <input type="email" name="username" required/>
+    <input type="password" name="password" required/>
+    <button type="submit">Login</button>
+</form>
+```
+
+### Patrón GlobalControllerAdvice (Universal)
+
+Este patrón es más elegante y DRY - añade el token CSRF automáticamente a todas las vistas:
+
+```java
+@ControllerAdvice
+public class GlobalControllerAdvice {
+    
+    @ModelAttribute
+    public void addCsrfToModel(Model model, HttpServletRequest request) {
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (csrfToken != null) {
+            model.addAttribute("csrfToken", csrfToken.getToken());
+            model.addAttribute("csrfParamName", csrfToken.getParameterName());
+        }
+    }
+}
+```
+
+**Ventajas:**
+- ✅ Centralizado - no necesitas añadirlo en cada controller
+- ✅ DRY - evita duplicación de código
+- ✅ Automático - todas las vistas tienen acceso al token
+
+**Uso en templates (igual que antes):**
+```html
+<form method="post" action="/app/producto/nuevo">
+    <input type="hidden" name="{{ csrfParamName }}" value="{{ csrfToken }}"/>
+    <!-- campos del formulario -->
+</form>
+```
+
+### CSRF en JavaScript/AJAX
+
+Para peticiones AJAX, es recomendable usar meta tags en el `<head>`:
+
+```html
+<head>
+    <meta name="_csrf" content="{{ csrfToken }}"/>
+    <meta name="_csrf_header" content="{{ csrfParamName }}"/>
+</head>
+```
+
+Luego en JavaScript:
+
+```javascript
+function getCsrfToken() {
+    return document.querySelector('meta[name="_csrf"]').getAttribute('content');
+}
+
+function getCsrfHeader() {
+    return document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+}
+
+// Uso con fetch
+fetch('/api/productos', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        [getCsrfHeader()]: getCsrfToken()
+    },
+    body: JSON.stringify(data)
+});
+
+// Uso con FormData
+const formData = new FormData();
+formData.append('nombre', 'Producto');
+formData.append(getCsrfHeader(), getCsrfToken());
+
+fetch('/app/producto/nuevo', {
+    method: 'POST',
+    body: formData
+});
+```
+
+## File Upload Security
+
+La subida de archivos requiere validaciones de seguridad estrictas para prevenir ataques.
+
+### Configuración Básica
+
+```java
+@Configuration
+public class StorageConfig {
+    
+    @Bean
+    public CommandLineRunner initStorage(StorageService storageService) {
+        return (args) -> {
+            storageService.init();
+        };
+    }
+}
+```
+
+### FileSystemStorageService Seguro
+
+```java
+@Service
+public class FileSystemStorageService implements StorageService {
+    
+    private final Path rootLocation;
+    
+    @Autowired
+    public FileSystemStorageService(StorageProperties properties) {
+        this.rootLocation = Paths.get(properties.getLocation());
+    }
+    
+    @Override
+    public String store(MultipartFile file) {
+        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+        String extension = StringUtils.getFilenameExtension(filename);
+        String justFilename = filename.replace("." + extension, "");
+        
+        // ⚠️ SEGURIDAD: Eliminar separadores de ruta del nombre
+        justFilename = justFilename.replaceAll("[/\\\\]", "_");
+        
+        String storedFilename = System.currentTimeMillis() + "_" + justFilename + "." + extension;
+        
+        try {
+            if (file.isEmpty()) {
+                throw new StorageException("Failed to store empty file " + filename);
+            }
+            
+            // ⚠️ SEGURIDAD: Prevenir path traversal attacks
+            if (filename.contains("..")) {
+                throw new StorageException(
+                    "Cannot store file with relative path outside current directory " + filename);
+            }
+            
+            // ⚠️ SEGURIDAD: Validar que la ruta resuelta está dentro del directorio root
+            Path destinationFile = this.rootLocation.resolve(storedFilename)
+                .normalize()
+                .toAbsolutePath();
+            
+            if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath().normalize())) {
+                throw new StorageException("Cannot store file outside current directory");
+            }
+            
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+                return storedFilename;
+            }
+        } catch (IOException e) {
+            throw new StorageException("Failed to store file " + filename, e);
+        }
+    }
+    
+    @Override
+    public Path load(String filename) {
+        // ⚠️ SEGURIDAD: Validar que el nombre de archivo no contiene intentos de path traversal
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+            throw new StorageException("Cannot load file with relative or absolute path: " + filename);
+        }
+        return rootLocation.resolve(filename);
+    }
+}
+```
+
+### Validaciones de Archivo
+
+```java
+@Controller
+public class FileUploadController {
+    
+    @Autowired
+    private StorageService storageService;
+    
+    // Tamaño máximo de archivo (Spring Boot)
+    // application.properties:
+    // spring.servlet.multipart.max-file-size=10MB
+    // spring.servlet.multipart.max-request-size=10MB
+    
+    @PostMapping("/app/producto/imagen/upload")
+    public ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file) {
+        
+        // ⚠️ Validar que el archivo no está vacío
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "El archivo está vacío"
+            ));
+        }
+        
+        // ⚠️ Validar el tipo de archivo (extensión)
+        String filename = file.getOriginalFilename();
+        String extension = StringUtils.getFilenameExtension(filename);
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+        
+        if (!allowedExtensions.contains(extension.toLowerCase())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Tipo de archivo no permitido. Usa: " + String.join(", ", allowedExtensions)
+            ));
+        }
+        
+        // ⚠️ Validar el tipo MIME (más seguro que solo la extensión)
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "El archivo no es una imagen válida"
+            ));
+        }
+        
+        // ⚠️ Validar el tamaño del archivo (adicional a la config de Spring)
+        long maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > maxSize) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "El archivo es demasiado grande. Máximo: 5MB"
+            ));
+        }
+        
+        try {
+            String storedFilename = storageService.store(file);
+            String fileUrl = "/files/" + storedFilename;
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "filename", storedFilename,
+                "url", fileUrl
+            ));
+        } catch (StorageException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "message", "Error al guardar el archivo: " + e.getMessage()
+            ));
+        }
+    }
+}
+```
+
+## Error Handling Custom
+
+Spring MVC permite personalizar el manejo de errores a nivel global.
+
+### CustomErrorController
+
+```java
+@Controller
+public class CustomErrorController implements ErrorController {
+    
+    @RequestMapping("/error")
+    public String handleError(HttpServletRequest request, Model model) {
+        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        
+        if (status != null) {
+            int statusCode = Integer.parseInt(status.toString());
+            
+            model.addAttribute("statusCode", statusCode);
+            
+            switch (statusCode) {
+                case 404:
+                    model.addAttribute("errorTitle", "Página no encontrada");
+                    model.addAttribute("errorMessage", "La página que buscas no existe.");
+                    break;
+                case 403:
+                    model.addAttribute("errorTitle", "Acceso denegado");
+                    model.addAttribute("errorMessage", "No tienes permisos para acceder a esta página.");
+                    break;
+                case 500:
+                    model.addAttribute("errorTitle", "Error del servidor");
+                    model.addAttribute("errorMessage", "Algo salió mal. Estamos trabajando en ello.");
+                    break;
+                default:
+                    model.addAttribute("errorTitle", "Error " + statusCode);
+                    model.addAttribute("errorMessage", "Ha ocurrido un error inesperado.");
+            }
+        }
+        
+        return "error";
+    }
+}
+```
+
+### GlobalExceptionHandler
+
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(StorageException.class)
+    public String handleStorageException(StorageException ex, Model model) {
+        model.addAttribute("errorTitle", "Error de almacenamiento");
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error";
+    }
+    
+    @ExceptionHandler(StorageFileNotFoundException.class)
+    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException ex) {
+        return ResponseEntity.notFound().build();
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public String handleGenericException(Exception ex, Model model) {
+        model.addAttribute("errorTitle", "Error inesperado");
+        model.addAttribute("errorMessage", "Ha ocurrido un error. Por favor, inténtalo de nuevo.");
+        // En producción, no mostrar detalles del error:
+        // model.addAttribute("errorDetails", ex.getMessage());
+        return "error";
+    }
+}
+```
+
+### Template de Error (error.peb.html)
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+{% include "fragments/head" %}
+
+<body class="d-flex flex-column min-vh-100">
+{% include "fragments/navbar" %}
+
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <h1 class="display-1">{{ statusCode | default('Error') }}</h1>
+            <h2 class="mb-4">{{ errorTitle | default('Algo salió mal') }}</h2>
+            <p class="lead">{{ errorMessage | default('Ha ocurrido un error inesperado.') }}</p>
+            
+            <div class="mt-4">
+                <a href="/" class="btn btn-primary">
+                    <i class="bi bi-house"></i> Volver al inicio
+                </a>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver atrás
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "fragments/footer" %}
+</body>
+</html>
+```
+
+## Marketplace Patterns
+
+Patrones específicos implementados en la aplicación de marketplace WalaSpringBoot.
+
+### Shopping Cart Session Pattern
+
+```java
+@Controller
+@RequestMapping("/app")
+public class PurchaseController {
+    
+    @Autowired
+    HttpSession session;
+    
+    // Obtener productos del carrito desde la sesión
+    @ModelAttribute("carrito")
+    public List<Product> productosCarrito() {
+        List<Long> contenido = (List<Long>) session.getAttribute("carrito");
+        return (contenido == null) ? null : productoServicio.variosPorId(contenido);
+    }
+    
+    // Calcular total del carrito
+    @ModelAttribute("total_carrito")
+    public Double totalCarrito() {
+        List<Product> productos = productosCarrito();
+        if (productos != null) {
+            return productos.stream()
+                .mapToDouble(Product::getPrecio)
+                .sum();
+        }
+        return 0.0;
+    }
+    
+    // Añadir producto al carrito
+    @GetMapping("/carrito/add/{id}")
+    public String addCarrito(@PathVariable Long id) {
+        List<Long> contenido = (List<Long>) session.getAttribute("carrito");
+        
+        if (contenido == null) {
+            contenido = new ArrayList<>();
+        }
+        
+        if (!contenido.contains(id)) {
+            contenido.add(id);
+        }
+        
+        session.setAttribute("carrito", contenido);
+        session.setAttribute("items_carrito", contenido.size());
+        
+        return "redirect:/app/carrito";
+    }
+    
+    // Eliminar del carrito
+    @GetMapping("/carrito/eliminar/{id}")
+    public String borrarDeCarrito(@PathVariable Long id) {
+        List<Long> contenido = (List<Long>) session.getAttribute("carrito");
+        
+        if (contenido == null) {
+            return "redirect:/public";
+        }
+        
+        contenido.remove(id);
+        
+        if (contenido.isEmpty()) {
+            session.removeAttribute("carrito");
+            session.removeAttribute("items_carrito");
+        } else {
+            session.setAttribute("carrito", contenido);
+            session.setAttribute("items_carrito", contenido.size());
+        }
+        
+        return "redirect:/app/carrito";
+    }
+    
+    // Finalizar compra
+    @GetMapping("/carrito/finalizar")
+    public String checkout() {
+        List<Long> contenido = (List<Long>) session.getAttribute("carrito");
+        
+        if (contenido == null) {
+            return "redirect:/public";
+        }
+        
+        List<Product> productos = productosCarrito();
+        Purchase compra = compraServicio.insertar(new Purchase(), usuario);
+        productos.forEach(p -> compraServicio.addProductoCompra(p, compra));
+        
+        // Limpiar carrito
+        session.removeAttribute("carrito");
+        session.removeAttribute("items_carrito");
+        
+        // Enviar email de confirmación (asíncrono)
+        new Thread(() -> {
+            try {
+                emailService.enviarEmailConfirmacionCompra(compra);
+            } catch (Exception e) {
+                System.err.println("Error enviando email: " + e.getMessage());
+            }
+        }).start();
+        
+        return "redirect:/app/miscompras/factura/" + compra.getId();
+    }
+}
+```
+
+### Favorites Pattern
+
+```java
+@RestController
+@RequestMapping("/app/favoritos")
+public class FavoriteController {
+    
+    @Autowired
+    private FavoriteService favoritoServicio;
+    
+    @Autowired
+    private UserService usuarioServicio;
+    
+    @Autowired
+    private ProductService productoServicio;
+    
+    // Añadir a favoritos
+    @PostMapping("/add/{productoId}")
+    public ResponseEntity<?> addFavorite(@PathVariable Long productoId) {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User usuario = usuarioServicio.buscarPorEmail(email);
+            Product producto = productoServicio.buscarPorId(productoId);
+            
+            if (producto == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Producto no encontrado"
+                ));
+            }
+            
+            // Verificar que no sea favorito ya
+            if (favoritoServicio.existeFavorito(usuario, producto)) {
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Ya está en favoritos",
+                    "isFavorite", true
+                ));
+            }
+            
+            favoritoServicio.agregar(usuario, producto);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Añadido a favoritos",
+                "isFavorite", true
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "message", "Error al añadir a favoritos"
+            ));
+        }
+    }
+    
+    // Eliminar de favoritos
+    @DeleteMapping("/remove/{productoId}")
+    public ResponseEntity<?> removeFavorite(@PathVariable Long productoId) {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User usuario = usuarioServicio.buscarPorEmail(email);
+            Product producto = productoServicio.buscarPorId(productoId);
+            
+            if (producto == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Producto no encontrado"
+                ));
+            }
+            
+            favoritoServicio.eliminar(usuario, producto);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Eliminado de favoritos",
+                "isFavorite", false
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "message", "Error al eliminar de favoritos"
+            ));
+        }
+    }
+}
+```
+
+### PDF Generation Pattern
+
+```java
+@Service
+public class Html2PdfServiceImpl implements Html2PdfService {
+    
+    @Autowired
+    PebbleEngine pebbleEngine;
+    
+    @Override
+    public InputStreamResource html2PdfGenerator(Map<String, Object> data) {
+        try {
+            // Cargar template de Pebble
+            PebbleTemplate compiledTemplate = pebbleEngine.getTemplate("app/pdf/facturapdf.peb.html");
+            
+            // Renderizar HTML
+            Writer writer = new StringWriter();
+            compiledTemplate.evaluate(writer, data);
+            String html = writer.toString();
+            
+            // Convertir a PDF
+            String destPath = "target/factura.pdf";
+            HtmlConverter.convertToPdf(html, new FileOutputStream(destPath));
+            
+            return new InputStreamResource(new FileInputStream(destPath));
+        } catch (IOException e) {
+            System.err.println("Error generando PDF: " + e.getMessage());
+            return null;
+        }
+    }
+}
+```
+
+### Rating System Pattern
+
+```java
+@RestController
+@RequestMapping("/app/ratings")
+public class RatingController {
+    
+    @Autowired
+    private RatingService ratingService;
+    
+    // Añadir valoración
+    @PostMapping("/add")
+    public ResponseEntity<?> addRating(
+            @RequestParam Long productoId,
+            @RequestParam Integer puntuacion,
+            @RequestParam(required = false) String comentario) {
+        
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User usuario = usuarioServicio.buscarPorEmail(email);
+            Product producto = productoServicio.buscarPorId(productoId);
+            
+            // Validar puntuación
+            if (puntuacion < 1 || puntuacion > 5) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "La puntuación debe estar entre 1 y 5"
+                ));
+            }
+            
+            // Crear o actualizar rating
+            Rating rating = new Rating();
+            rating.setUsuario(usuario);
+            rating.setProducto(producto);
+            rating.setPuntuacion(puntuacion);
+            rating.setComentario(comentario);
+            
+            ratingService.save(rating);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Valoración guardada correctamente"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "message", "Error al guardar la valoración"
+            ));
+        }
+    }
+    
+    // Obtener valoraciones de un producto
+    @GetMapping("/producto/{productoId}")
+    public ResponseEntity<?> getProductRatings(@PathVariable Long productoId) {
+        try {
+            Product producto = productoServicio.buscarPorId(productoId);
+            
+            if (producto == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Producto no encontrado"
+                ));
+            }
+            
+            List<Rating> ratings = ratingService.findByProducto(producto);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "ratings", ratings
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "message", "Error al obtener las valoraciones"
+            ));
+        }
+    }
+}
+```
+
 ## Testing de Controllers
 
 ### Test de Controller con MockMvc

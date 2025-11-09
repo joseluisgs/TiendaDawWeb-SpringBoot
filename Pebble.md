@@ -416,6 +416,394 @@ Los filtros transforman valores. Se aplican con el operador `|`:
 {{ texto | lower | capitalize | abbreviate(100) }}
 ```
 
+## Filtros Personalizados
+
+Pebble permite crear filtros personalizados para necesidades específicas de la aplicación.
+
+### Configuración de Filtros Personalizados
+
+```java
+package com.joseluisgs.walaspringboot.config;
+
+import io.pebbletemplates.pebble.extension.AbstractExtension;
+import io.pebbletemplates.pebble.extension.Filter;
+import io.pebbletemplates.boot.autoconfigure.PebbleAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+@Configuration
+@AutoConfigureBefore(PebbleAutoConfiguration.class)
+public class PebbleConfig {
+
+    @Bean
+    public io.pebbletemplates.pebble.extension.Extension customPebbleExtension() {
+        return new AbstractExtension() {
+            @Override
+            public Map<String, Filter> getFilters() {
+                Map<String, Filter> filters = new HashMap<>();
+                filters.put("formatDate", new FormatDateFilter());
+                filters.put("formatPrice", new FormatPriceFilter());
+                return filters;
+            }
+        };
+    }
+
+    // Filtro para formatear fechas
+    private static class FormatDateFilter implements Filter {
+        @Override
+        public Object apply(Object input, Map<String, Object> args, 
+                          io.pebbletemplates.pebble.template.PebbleTemplate self,
+                          io.pebbletemplates.pebble.template.EvaluationContext context, 
+                          int lineNumber) throws io.pebbletemplates.pebble.error.PebbleException {
+            if (input == null) {
+                return "";
+            }
+
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                    "d MMM yyyy, HH:mm", 
+                    new Locale("es", "ES")
+                );
+                
+                if (input instanceof LocalDateTime) {
+                    return ((LocalDateTime) input).format(formatter);
+                } else if (input instanceof Date) {
+                    SimpleDateFormat sdf = new SimpleDateFormat(
+                        "d MMM yyyy, HH:mm", 
+                        new Locale("es", "ES")
+                    );
+                    return sdf.format((Date) input);
+                } else if (input instanceof String) {
+                    // Try to parse as LocalDateTime
+                    try {
+                        LocalDateTime dateTime = LocalDateTime.parse(input.toString());
+                        return dateTime.format(formatter);
+                    } catch (Exception e) {
+                        return input.toString();
+                    }
+                }
+            } catch (Exception e) {
+                return input.toString();
+            }
+            
+            return input.toString();
+        }
+
+        @Override
+        public List<String> getArgumentNames() {
+            return null;
+        }
+    }
+
+    // Filtro para formatear precios
+    private static class FormatPriceFilter implements Filter {
+        @Override
+        public Object apply(Object input, Map<String, Object> args, 
+                          io.pebbletemplates.pebble.template.PebbleTemplate self,
+                          io.pebbletemplates.pebble.template.EvaluationContext context, 
+                          int lineNumber) throws io.pebbletemplates.pebble.error.PebbleException {
+            if (input == null) {
+                return "0,00 €";
+            }
+
+            try {
+                double price;
+                if (input instanceof Number) {
+                    price = ((Number) input).doubleValue();
+                } else {
+                    price = Double.parseDouble(input.toString());
+                }
+
+                DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("es", "ES"));
+                symbols.setDecimalSeparator(',');
+                symbols.setGroupingSeparator('.');
+                
+                DecimalFormat df = new DecimalFormat("#,##0.00 €", symbols);
+                return df.format(price);
+            } catch (Exception e) {
+                return input.toString() + " €";
+            }
+        }
+
+        @Override
+        public List<String> getArgumentNames() {
+            return null;
+        }
+    }
+}
+```
+
+### Uso de Filtros Personalizados
+
+#### formatPrice
+
+Formatea números como precios con el símbolo € y separadores de miles y decimales según la localización española.
+
+```pebble
+{# Precio simple #}
+{{ 99.99 | formatPrice }}
+{# Salida: 99,99 € #}
+
+{# Precio con miles #}
+{{ 1599.50 | formatPrice }}
+{# Salida: 1.599,50 € #}
+
+{# Variable de precio #}
+<span class="badge bg-success">{{ producto.precio | formatPrice }}</span>
+
+{# Total del carrito #}
+<h4>Total: {{ total_carrito | formatPrice }}</h4>
+```
+
+**Características:**
+- ✅ Separador de miles: punto (.)
+- ✅ Separador de decimales: coma (,)
+- ✅ Siempre muestra 2 decimales
+- ✅ Añade símbolo € al final
+- ✅ Maneja valores null como "0,00 €"
+
+#### formatDate
+
+Formatea fechas en formato español legible.
+
+```pebble
+{# Fecha de compra #}
+<span>Fecha: {{ compra.fechaCompra | formatDate }}</span>
+{# Salida: 15 nov 2025, 14:30 #}
+
+{# Fecha de registro #}
+<small>Registrado: {{ usuario.fechaRegistro | formatDate }}</small>
+{# Salida: 1 ene 2025, 09:15 #}
+
+{# En tarjeta #}
+<div class="card-header">
+    <span>Compra #{{ compra.id }}</span>
+    <span>{{ compra.fechaCompra | formatDate }}</span>
+</div>
+```
+
+**Características:**
+- ✅ Formato: "d MMM yyyy, HH:mm"
+- ✅ Meses en español abreviados (ene, feb, mar...)
+- ✅ Soporta LocalDateTime y Date
+- ✅ Maneja valores null devolviendo string vacío
+
+### Creando Filtros Adicionales
+
+#### Ejemplo: Filtro para Números (formatNumber)
+
+Si necesitas formatear números sin el símbolo €:
+
+```java
+private static class FormatNumberFilter implements Filter {
+    @Override
+    public Object apply(Object input, Map<String, Object> args, 
+                      io.pebbletemplates.pebble.template.PebbleTemplate self,
+                      io.pebbletemplates.pebble.template.EvaluationContext context, 
+                      int lineNumber) throws io.pebbletemplates.pebble.error.PebbleException {
+        if (input == null) {
+            return "0";
+        }
+
+        try {
+            // Obtener decimales del argumento (por defecto 0)
+            int decimals = 0;
+            if (args.containsKey("decimals")) {
+                decimals = ((Number) args.get("decimals")).intValue();
+            }
+            
+            double number;
+            if (input instanceof Number) {
+                number = ((Number) input).doubleValue();
+            } else {
+                number = Double.parseDouble(input.toString());
+            }
+
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("es", "ES"));
+            symbols.setDecimalSeparator(',');
+            symbols.setGroupingSeparator('.');
+            
+            String pattern = decimals > 0 ? 
+                "#,##0." + "0".repeat(decimals) : 
+                "#,##0";
+            
+            DecimalFormat df = new DecimalFormat(pattern, symbols);
+            return df.format(number);
+        } catch (Exception e) {
+            return input.toString();
+        }
+    }
+
+    @Override
+    public List<String> getArgumentNames() {
+        return List.of("decimals");
+    }
+}
+```
+
+**Uso:**
+```pebble
+{# Sin decimales #}
+{{ cantidad | formatNumber }}
+{# Salida: 1.500 #}
+
+{# Con 1 decimal #}
+{{ averageRating | formatNumber(decimals=1) }}
+{# Salida: 4,5 #}
+
+{# Con 2 decimales #}
+{{ precio | formatNumber(decimals=2) }}
+{# Salida: 99,95 #}
+```
+
+#### Ejemplo: Filtro Truncate con Elipsis
+
+```java
+private static class TruncateFilter implements Filter {
+    @Override
+    public Object apply(Object input, Map<String, Object> args, 
+                      io.pebbletemplates.pebble.template.PebbleTemplate self,
+                      io.pebbletemplates.pebble.template.EvaluationContext context, 
+                      int lineNumber) throws io.pebbletemplates.pebble.error.PebbleException {
+        if (input == null) {
+            return "";
+        }
+
+        String text = input.toString();
+        int length = 100; // Por defecto
+        
+        if (args.containsKey("length")) {
+            length = ((Number) args.get("length")).intValue();
+        }
+        
+        if (text.length() <= length) {
+            return text;
+        }
+        
+        return text.substring(0, length) + "...";
+    }
+
+    @Override
+    public List<String> getArgumentNames() {
+        return List.of("length");
+    }
+}
+```
+
+**Uso:**
+```pebble
+{# Descripción truncada #}
+<p>{{ producto.descripcion | truncate(60) }}</p>
+{# Salida: "Este es un producto muy interesante que tiene muchas ca..." #}
+
+{# Sin parámetros (usa 100 por defecto) #}
+<p>{{ texto | truncate }}</p>
+```
+
+### Registrar Múltiples Filtros
+
+Para añadir el nuevo filtro al `PebbleConfig`:
+
+```java
+@Bean
+public io.pebbletemplates.pebble.extension.Extension customPebbleExtension() {
+    return new AbstractExtension() {
+        @Override
+        public Map<String, Filter> getFilters() {
+            Map<String, Filter> filters = new HashMap<>();
+            filters.put("formatDate", new FormatDateFilter());
+            filters.put("formatPrice", new FormatPriceFilter());
+            filters.put("formatNumber", new FormatNumberFilter());  // Nuevo
+            filters.put("truncate", new TruncateFilter());          // Nuevo
+            return filters;
+        }
+    };
+}
+```
+
+### Best Practices para Filtros Personalizados
+
+#### 1. Manejo de Null
+```java
+if (input == null) {
+    return ""; // o valor por defecto apropiado
+}
+```
+
+#### 2. Validación de Tipos
+```java
+try {
+    if (input instanceof Number) {
+        // manejar número
+    } else {
+        // intentar parsear
+    }
+} catch (Exception e) {
+    return input.toString(); // fallback seguro
+}
+```
+
+#### 3. Parámetros Opcionales
+```java
+@Override
+public List<String> getArgumentNames() {
+    return List.of("param1", "param2"); // o null si no hay parámetros
+}
+```
+
+#### 4. Documentación Clara
+```pebble
+{# ✅ Bien documentado #}
+{# Formato: formatDate(fecha) -> "15 nov 2025, 14:30" #}
+{{ compra.fechaCompra | formatDate }}
+
+{# ✅ Con parámetros #}
+{# Formato: truncate(texto, length=100) #}
+{{ descripcion | truncate(60) }}
+```
+
+#### 5. Nombres Descriptivos
+```java
+// ✅ Bueno
+filters.put("formatPrice", new FormatPriceFilter());
+filters.put("formatDate", new FormatDateFilter());
+
+// ❌ Malo
+filters.put("fp", new FormatPriceFilter());
+filters.put("fd", new FormatDateFilter());
+```
+
+### Filtros vs Funciones
+
+| Aspecto | Filtros | Funciones |
+|---------|---------|-----------|
+| **Sintaxis** | `{{ valor \| filtro }}` | `{{ funcion(valor) }}` |
+| **Uso** | Transformar valores existentes | Generar nuevos valores |
+| **Encadenado** | `{{ valor \| filtro1 \| filtro2 }}` | No natural |
+| **Ejemplo** | `{{ precio \| formatPrice }}` | `{{ range(1, 10) }}` |
+
+**Cuando usar filtros:**
+- Transformar datos de salida (formato, escape)
+- Operaciones sobre valores del modelo
+- Presentación de datos
+
+**Cuando usar funciones:**
+- Generar datos nuevos
+- Operaciones complejas
+- Utilidades reutilizables
+
 ## Funciones
 
 ### Funciones Incorporadas
