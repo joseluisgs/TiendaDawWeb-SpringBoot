@@ -12,14 +12,73 @@
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-12 text-end">
-            <a class="btn btn-info" href="/app/misproducto/nuevo">
-                <i class="bi bi-plus-circle"></i> Nuevo producto
-            </a>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-box text-primary"></i> Mis Productos</h2>
+        <a href="/app/misproducto/nuevo" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Nuevo Producto
+        </a>
     </div>
 
+    {% if misproductos is empty %}
+    <!-- Elegant empty state -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-box-seam display-1 text-muted" style="font-size: 8rem;"></i>
+        </div>
+        <h3 class="text-muted mb-3">Sin productos en tu catálogo</h3>
+        <p class="text-muted mb-4 lead">
+            Aún no has agregado ningún producto a tu tienda.<br>
+            ¡Empieza a vender agregando tu primer producto!
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/app/misproducto/nuevo" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-plus-circle-fill me-2"></i> Agregar Primer Producto
+            </a>
+            <a href="/public" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Marketplace
+            </a>
+        </div>
+        
+        <!-- Tips for users -->
+        <div class="mt-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">💡 Tips para empezar</h5>
+                    <div class="row text-start">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-camera text-primary me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">Fotos de calidad</h6>
+                                    <small class="text-muted">Agrega imágenes claras de tus productos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-textarea-t text-primary me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">Descripciones detalladas</h6>
+                                    <small class="text-muted">Incluye características y beneficios</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-currency-euro text-primary me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">Precios competitivos</h6>
+                                    <small class="text-muted">Investiga el mercado antes de establecer precios</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Existing products list -->
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for producto in misproductos %}
         <div class="col">
@@ -68,6 +127,7 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 
 <!-- Delete Modal -->

@@ -64,9 +64,14 @@
 
                 {% if isAuthenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/app/carrito">
-                        <span class="badge bg-danger">{{ items_carrito | default(0) }}</span>
-                        <i class="bi bi-cart"></i> {{ message('nav.shopping.cart') }}
+                    <a class="nav-link position-relative" href="/app/carrito">
+                        <i class="bi bi-cart3"></i> {{ message('nav.shopping.cart') }}
+                        {% if hasCartItems %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ cartItemCount }}
+                            <span class="visually-hidden">productos en carrito</span>
+                        </span>
+                        {% endif %}
                     </a>
                 </li>
                 <li class="nav-item dropdown">
