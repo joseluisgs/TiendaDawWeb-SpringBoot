@@ -132,6 +132,14 @@ public class ZonaPublicaController {
                     if (usuario != null) {
                         boolean isFavorite = favoriteService.isFavorite(usuario, id);
                         model.addAttribute("isFavorite", isFavorite);
+                        
+                        // Check if user has already rated this product
+                        boolean yaValorado = ratingService.yaValorado(usuario.getId(), id);
+                        model.addAttribute("yaValorado", yaValorado);
+                        if (yaValorado) {
+                            var existingRating = ratingService.getValoracionUsuario(usuario.getId(), id);
+                            existingRating.ifPresent(rating -> model.addAttribute("miValoracion", rating));
+                        }
                     }
                 }
             } catch (Exception e) {
