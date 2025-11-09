@@ -94,8 +94,8 @@
                 <img alt="{{ producto.nombre }}" class="card-img-top" 
                      src="{{ producto.imagenOrDefault }}"
                      style="height: 300px; object-fit: cover;">
-                <div class="card-footer bg-white">
-                    <div class="mb-2">
+                <div class="card-footer bg-white border-0 pt-0">
+                    <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 text-primary">{{ producto.precio | formatPrice }}</h5>
                             {% if producto.compra is not null %}
@@ -106,15 +106,15 @@
                         </div>
                     </div>
                     {% if producto.compra is null %}
-                    <div class="d-flex gap-2 justify-content-between">
-                        <a class="btn btn-primary btn-sm flex-fill" href="/public/producto/{{ producto.id }}" title="Ver producto">
-                            👁️ Ver
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="/public/producto/{{ producto.id }}" class="btn btn-outline-info btn-sm" title="Ver producto">
+                            <i class="bi bi-eye"></i> Ver
                         </a>
-                        <a class="btn btn-warning btn-sm flex-fill" href="/app/misproductos/editar/{{ producto.id }}" title="Editar producto">
-                            ✏️ Editar
+                        <a href="/app/misproductos/editar/{{ producto.id }}" class="btn btn-outline-warning btn-sm" title="Editar">
+                            <i class="bi bi-pencil"></i> Editar
                         </a>
-                        <button class="btn btn-danger btn-sm flex-fill" data-bs-target="#deleteModal" data-bs-toggle="modal" data-id="{{ producto.id }}" type="button" title="Borrar producto">
-                            🗑️ Borrar
+                        <button class="btn btn-outline-danger btn-sm" data-bs-target="#deleteModal" data-bs-toggle="modal" data-id="{{ producto.id }}" type="button" title="Eliminar">
+                            <i class="bi bi-trash"></i> Borrar
                         </button>
                     </div>
                     {% endif %}

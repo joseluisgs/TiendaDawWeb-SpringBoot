@@ -93,10 +93,10 @@
                     <!-- Action Buttons -->
                     {% if isAuthenticated and currentUser.email != producto.propietario.email %}
                     <div class="d-grid gap-3 mb-3">
-                        <button class="btn btn-success btn-lg shadow-sm hover-lift" onclick="addToCart({{ producto.id }})">
+                        <button class="btn btn-success btn-lg action-btn" onclick="addToCart({{ producto.id }})">
                             <i class="bi bi-cart-plus"></i> Añadir al Carrito
                         </button>
-                        <button class="btn btn-outline-danger btn-lg shadow-sm hover-lift" id="favoriteBtn" onclick="toggleFavorite({{ producto.id }})">
+                        <button class="btn btn-outline-danger btn-lg action-btn" id="favoriteBtn" onclick="toggleFavorite({{ producto.id }})">
                             <i class="bi bi-heart{% if isFavorite %}-fill{% endif %}" id="favoriteIcon"></i>
                             <span id="favoriteText">{% if isFavorite %}Quitar de Favoritos{% else %}Añadir a Favoritos{% endif %}</span>
                         </button>
@@ -112,7 +112,7 @@
             <!-- Seller Card -->
             <div class="card shadow-lg border-0">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-person-circle"></i> Vendedor</h5>
+                    <h5 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> Vendedor</h5>
                     <div class="d-flex align-items-center mb-3">
                         <img alt="Avatar del vendedor"
                              class="rounded-circle shadow me-3" 
@@ -120,11 +120,53 @@
                              src="{% if producto.propietario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ producto.propietario.email }}.png{% else %}{{ producto.propietario.avatar }}{% endif %}">
                         <div>
                             <h5 class="mb-1 fw-bold">{{ producto.propietario.nombre }} {{ producto.propietario.apellidos }}</h5>
-                            <p class="text-muted mb-0 small"><i class="bi bi-envelope"></i> {{ producto.propietario.email }}</p>
+                            <p class="text-muted mb-0 small">
+                                <i class="bi bi-calendar"></i> Miembro desde 
+                                {% if producto.propietario.fechaAlta is not null %}
+                                    {{ producto.propietario.fechaAlta | date('MMMM yyyy') }}
+                                {% else %}
+                                    2024
+                                {% endif %}
+                            </p>
                         </div>
                     </div>
+                    
+                    <!-- Seller Rating -->
+                    <div class="mb-3 p-3 rounded" style="background-color: #f8f9fa;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">Valoración del vendedor:</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="text-warning fs-5 me-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </div>
+                            <span class="fw-bold">4.7</span>
+                            <span class="text-muted ms-2">(89 opiniones)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Seller Stats -->
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background-color: #f8f9fa;">
+                                <h6 class="mb-0 fw-bold text-primary">45</h6>
+                                <small class="text-muted">Productos</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background-color: #f8f9fa;">
+                                <h6 class="mb-0 fw-bold text-success">32</h6>
+                                <small class="text-muted">Ventas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
                     {% if isAuthenticated and currentUser.email != producto.propietario.email %}
-                    <a href="mailto:{{ producto.propietario.email }}" class="btn btn-primary btn-sm w-100 hover-lift">
+                    <a href="mailto:{{ producto.propietario.email }}" class="btn btn-primary btn-sm w-100 hover-lift action-btn">
                         <i class="bi bi-envelope-fill"></i> Contactar Vendedor
                     </a>
                     {% endif %}
@@ -197,6 +239,16 @@
 .hover-lift:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.action-btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .product-image-card {
