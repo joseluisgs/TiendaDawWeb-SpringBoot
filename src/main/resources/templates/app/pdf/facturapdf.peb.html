@@ -4,50 +4,234 @@
     <meta charset="UTF-8">
     <title>Factura #{{ compra.id }}</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .info { margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #4CAF50; color: white; }
-        .total { text-align: right; font-weight: bold; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .invoice-meta {
+            text-align: right;
+        }
+        .invoice-meta h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .invoice-meta p {
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .info-box p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .info-box strong {
+            color: #667eea;
+            display: inline-block;
+            width: 120px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td { 
+            padding: 14px; 
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .total-section {
+            margin-top: 30px;
+            text-align: right;
+        }
+        .total-table {
+            display: inline-block;
+            width: 350px;
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+        .total-row.subtotal {
+            border-bottom: 1px solid #e9ecef;
+        }
+        .total-row.iva {
+            border-bottom: 1px solid #e9ecef;
+        }
+        .total-row.final {
+            border-top: 2px solid #667eea;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .alert-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+        .alert-box p {
+            margin: 0;
+            font-size: 14px;
+            color: #0c5460;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Factura #{{ compra.id }}</h1>
-        <p>Wala Spring Boot - Tienda de Segunda Mano</p>
+        <div class="header-info" style="display: table; width: 100%;">
+            <div style="display: table-cell; vertical-align: middle;">
+                <h1>WalaSpringBoot</h1>
+                <p>Tienda de Segunda Mano</p>
+            </div>
+            <div class="invoice-meta" style="display: table-cell; vertical-align: middle; text-align: right;">
+                <h2>Factura #{{ compra.id }}</h2>
+                <p>{{ compra.fechaCompra | formatDate }}</p>
+            </div>
+        </div>
     </div>
     
-    <div class="info">
-        <p><strong>Fecha:</strong> {{ compra.fechaCompra | formatDate }}</p>
-        <p><strong>Comprador:</strong> {{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</p>
-        <p><strong>Email:</strong> {{ compra.propietario.email }}</p>
+    <div class="info-grid" style="margin-bottom: 30px;">
+        <div class="info-box">
+            <div class="section-title" style="color: #667eea; font-size: 16px; margin-bottom: 15px; font-weight: 600;">Datos del Cliente</div>
+            <p><strong>Nombre:</strong> {{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</p>
+            <p><strong>Email:</strong> {{ compra.propietario.email }}</p>
+        </div>
+        <div class="info-box">
+            <div class="section-title" style="color: #667eea; font-size: 16px; margin-bottom: 15px; font-weight: 600;">Información de Compra</div>
+            <p><strong>Fecha:</strong> {{ compra.fechaCompra | formatDate }}</p>
+            <p><strong>ID:</strong> #{{ compra.id }}</p>
+        </div>
     </div>
     
-    <table>
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Vendedor</th>
-                <th>Precio</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for producto in productos %}
-            <tr>
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.propietario.email }}</td>
-                <td>{{ producto.precio | formatPrice }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="2" class="total">Total:</td>
-                <td><strong>{{ total | formatPrice }}</strong></td>
-            </tr>
-        </tfoot>
-    </table>
+    <div class="section">
+        <h3 class="section-title">Productos Adquiridos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Producto</th>
+                    <th style="width: 30%;">Vendedor</th>
+                    <th style="width: 20%; text-align: right;">Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td><strong>{{ producto.nombre }}</strong></td>
+                    <td>{{ producto.propietario.email }}</td>
+                    <td style="text-align: right;">{{ producto.precio | formatPrice }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="total-section">
+        <div class="total-table">
+            <div class="total-row subtotal">
+                <span>Subtotal (sin IVA):</span>
+                <span><strong>{{ subtotal | formatPrice }}</strong></span>
+            </div>
+            <div class="total-row iva">
+                <span>IVA (21%):</span>
+                <span><strong>{{ iva | formatPrice }}</strong></span>
+            </div>
+            <div class="total-row final">
+                <span>TOTAL:</span>
+                <span>{{ total | formatPrice }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert-box">
+        <p><strong>Nota:</strong> Esta es tu factura de compra. Guárdala para tus registros. Gracias por confiar en WalaSpringBoot.</p>
+    </div>
+    
+    <div class="footer">
+        <p>WalaSpringBoot © 2025 - Tienda de Segunda Mano</p>
+        <p>Documento generado automáticamente</p>
+    </div>
 </body>
 </html>
