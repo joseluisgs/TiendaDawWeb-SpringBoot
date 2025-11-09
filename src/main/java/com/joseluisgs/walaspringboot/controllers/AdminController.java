@@ -155,7 +155,23 @@ public class AdminController {
 
     @GetMapping("/ventas")
     public String gestionVentas(Model model) {
-        model.addAttribute("compras", compraServicio.findAll());
+        // Usar join fetch para evitar N+1 queries
+        var compras = compraServicio.findAllWithProducts();
+        
+        // Calcular estadísticas del dashboard
+        Double totalVentas = compras.stream()
+            .mapToDouble(com.joseluisgs.walaspringboot.models.Purchase::getTotal)
+            .sum();
+        
+        int totalTransacciones = compras.size();
+        
+        Double valorPromedio = totalTransacciones > 0 ? totalVentas / totalTransacciones : 0.0;
+        
+        model.addAttribute("compras", compras);
+        model.addAttribute("totalVentas", totalVentas);
+        model.addAttribute("totalTransacciones", totalTransacciones);
+        model.addAttribute("valorPromedio", valorPromedio);
+        
         return "admin/ventas";
     }
 }

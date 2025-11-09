@@ -18,6 +18,34 @@
         </div>
     </div>
 
+    <!-- Estadísticas del dashboard -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="card-title">💰 Ingresos Totales</div>
+                    <h3>{{ totalVentas | formatPrice }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="card-title">🛍️ Total Transacciones</div>
+                    <h3>{{ totalTransacciones }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="card-title">📊 Valor Promedio</div>
+                    <h3>{{ valorPromedio | formatPrice }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow">
         <div class="card-header bg-success text-white">
             <h4 class="mb-0">Todas las Transacciones</h4>
@@ -36,6 +64,7 @@
                         <th>Fecha</th>
                         <th>Comprador</th>
                         <th>Email</th>
+                        <th>Productos</th>
                         <th>Precio Total (€)</th>
                         <th>Acciones</th>
                     </tr>
@@ -43,11 +72,14 @@
                     <tbody>
                     {% for compra in compras %}
                     <tr>
-                        <td>{{ compra.id }}</td>
+                        <td><strong>#{{ compra.id }}</strong></td>
                         <td>{{ compra.fechaCompra | formatDate }}</td>
                         <td>{{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</td>
                         <td>{{ compra.propietario.email }}</td>
-                        <td>{{ compra.total | formatPrice }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ compra.cantidadProductos }} productos</span>
+                        </td>
+                        <td><strong class="text-success">{{ compra.total | formatPrice }}</strong></td>
                         <!-- Botón para ver la factura y el detalle de la compra -->
                         <td>
                             <a class="btn btn-outline-primary btn-sm" href="/app/miscompras/factura/{{ compra.id }}/pdf"

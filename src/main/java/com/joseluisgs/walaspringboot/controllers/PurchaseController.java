@@ -89,7 +89,7 @@ public class PurchaseController {
     public List<Purchase> misCompras() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         usuario = usuarioServicio.buscarPorEmail(email);
-        return compraServicio.porPropietario(usuario);
+        return compraServicio.findByPropietarioWithProducts(usuario);
     }
 
     // Como ya tenemos el modelo carrito y total_carrito definido, solo debemos ir a la platilla
@@ -189,26 +189,22 @@ public class PurchaseController {
     // Mustra las compras e un listado
     @GetMapping("/miscompras")
     public String verMisCompras(Model model) {
-        // Obtener todos los productos para poder mostrarlos por compra
-        List<Product> todosProductos = productoServicio.findAll();
-        model.addAttribute("productos", todosProductos);
+        // Ya no necesitamos enviar productos por separado
+        // Los productos están cargados en cada compra mediante JOIN FETCH
         return "/app/compra/listado";
     }
 
     //Obtiene la factura con un id
     @GetMapping("/miscompras/factura/{id}")
     public String factura(Model model, @PathVariable Long id) {
-        // Recupero la compra mediante su ID
-        Purchase c = compraServicio.buscarPorId(id);
-        // Obtengo la lista de productos por su id asociados a la compra
-        List<Product> productos = productoServicio.productosDeUnaCompra(c);
-        // Los metemos en el modelo
-        model.addAttribute("productos", productos);
+        // Recupero la compra mediante su ID con productos cargados
+        Purchase c = compraServicio.findByIdWithProducts(id);
+        // Los productos ya están cargados en c.productos
+        model.addAttribute("productos", c.getProductos());
         model.addAttribute("compra", c);
-        // Calculamos el total de la compra, es un for each
-        Double total = productos.stream().mapToDouble(p -> p.getPrecio()).sum();
-        model.addAttribute("total_compra", total);
-        model.addAttribute("total", total);
+        // El total se calcula automáticamente
+        model.addAttribute("total_compra", c.getTotal());
+        model.addAttribute("total", c.getTotal());
         // Devolvemos la factura
         return "/app/compra/factura";
     }
@@ -216,12 +212,12 @@ public class PurchaseController {
     // Saco una factura en PDF usando itex - Simple and working version
     @RequestMapping(value = "/miscompras/factura/{id}/pdf", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<InputStreamResource> facturaPDF(@PathVariable Long id) {
-        // Recupero la compra mediante su ID
-        Purchase compra = compraServicio.buscarPorId(id);
-        // Obtengo la lista de productos por su id asociados a la compra
-        List<Product> productos = productoServicio.productosDeUnaCompra(compra);
-        // Total de la compra
-        Double total = productos.stream().mapToDouble(p -> p.getPrecio()).sum();
+        // Recupero la compra mediante su ID con productos cargados
+        Purchase compra = compraServicio.findByIdWithProducts(id);
+        // Los productos ya están cargados
+        List<Product> productos = compra.getProductos();
+        // Total calculado automáticamente
+        Double total = compra.getTotal();
 
         ByteArrayInputStream bis = GeneradorPDF.factura2PDF(compra, productos, total);
 

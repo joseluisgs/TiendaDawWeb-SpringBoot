@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service
@@ -62,5 +64,22 @@ public class PurchaseService {
     
     public boolean existsByProduct(Product product) {
         return repositorio.existsByProduct(product);
+    }
+    
+    // Nuevos métodos con JOIN FETCH para cargar productos
+    @Transactional(readOnly = true)
+    public List<Purchase> findAllWithProducts() {
+        return repositorio.findAllWithProducts();
+    }
+    
+    @Transactional(readOnly = true)
+    public Purchase findByIdWithProducts(Long id) {
+        return repositorio.findByIdWithProducts(id)
+            .orElseThrow(() -> new EntityNotFoundException("Purchase not found: " + id));
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Purchase> findByPropietarioWithProducts(User propietario) {
+        return repositorio.findByPropietarioWithProducts(propietario);
     }
 }
