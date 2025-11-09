@@ -50,7 +50,13 @@
                         </td>
                         <td>{{ producto.nombre }}</td>
                         <td><strong>{{ producto.precio | formatPrice }}</strong></td>
-                        <td><span class="badge bg-secondary">{{ producto.categoria }}</span></td>
+                        <td>
+                            {% if producto.categoria %}
+                            <span class="badge bg-info">{{ producto.categoria.displayNameWithEmoji }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Sin categoría</span>
+                            {% endif %}
+                        </td>
                         <td>{{ producto.propietario.nombre }}</td>
                         <td>
                             {% if producto.compra is not null %}

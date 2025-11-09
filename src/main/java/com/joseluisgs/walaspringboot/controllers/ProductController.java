@@ -1,6 +1,7 @@
 package com.joseluisgs.walaspringboot.controllers;
 
 import com.joseluisgs.walaspringboot.models.Product;
+import com.joseluisgs.walaspringboot.models.ProductCategory;
 import com.joseluisgs.walaspringboot.models.User;
 import com.joseluisgs.walaspringboot.services.ProductService;
 import com.joseluisgs.walaspringboot.services.UserService;
@@ -42,6 +43,12 @@ public class ProductController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         usuario = usuarioServicio.buscarPorEmail(email);
         return productoServicio.productosDeUnPropietario(usuario);
+    }
+    
+    // Inyectamos las categorías en el modelo para los formularios
+    @ModelAttribute("categorias")
+    public ProductCategory[] getCategorias() {
+        return ProductCategory.values();
     }
 
     // Obtenemos la lista de mis productos, de hecho dejamos buscar, recibiendo el modelo
@@ -111,8 +118,19 @@ public class ProductController {
     @PostMapping("/misproducto/nuevo/submit")
     public String nuevoProductoSubmit(@Valid @ModelAttribute Product producto,
                                       @RequestParam("file") MultipartFile file,
+                                      @RequestParam(value = "categoria", required = false) String categoria,
                                       BindingResult bindingResult) {
 
+        // Validar y asignar categoría
+        if (categoria != null && !categoria.isEmpty()) {
+            try {
+                producto.setCategoria(ProductCategory.valueOf(categoria));
+            } catch (IllegalArgumentException e) {
+                bindingResult.rejectValue("categoria", "error.categoria", "Categoría inválida");
+                return "app/producto/ficha";
+            }
+        }
+        
         // Si no tiene errores
         if (bindingResult.hasErrors()) {
             return "app/producto/ficha";
@@ -150,7 +168,19 @@ public class ProductController {
     @PostMapping("/misproductos/editar/submit")
     public String editarEmpleadoSubmit(@Valid @ModelAttribute("producto") Product actualProducto,
                                        @RequestParam("file") MultipartFile file,
+                                       @RequestParam(value = "categoria", required = false) String categoria,
                                         BindingResult bindingResult) {
+        
+        // Validar y asignar categoría
+        if (categoria != null && !categoria.isEmpty()) {
+            try {
+                actualProducto.setCategoria(ProductCategory.valueOf(categoria));
+            } catch (IllegalArgumentException e) {
+                bindingResult.rejectValue("categoria", "error.categoria", "Categoría inválida");
+                return "app/producto/ficha";
+            }
+        }
+        
         // Si no tiene errores
         if (bindingResult.hasErrors()) {
             return "app/producto/ficha";

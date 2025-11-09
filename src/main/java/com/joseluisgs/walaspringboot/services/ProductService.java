@@ -2,6 +2,7 @@ package com.joseluisgs.walaspringboot.services;
 
 import com.joseluisgs.walaspringboot.models.Purchase;
 import com.joseluisgs.walaspringboot.models.Product;
+import com.joseluisgs.walaspringboot.models.ProductCategory;
 import com.joseluisgs.walaspringboot.models.User;
 import com.joseluisgs.walaspringboot.repositories.ProductRepository;
 import com.joseluisgs.walaspringboot.storage.StorageService;
@@ -99,5 +100,10 @@ public class ProductService {
     
     public boolean hasBeenSold(Product product) {
         return product.getCompra() != null;
+    }
+    
+    @Cacheable(value = "productos", key = "'categoria_' + #categoria.name()")
+    public List<Product> findByCategoria(ProductCategory categoria) {
+        return repositorio.findByCategoria(categoria);
     }
 }

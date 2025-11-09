@@ -1,6 +1,7 @@
 package com.joseluisgs.walaspringboot.controllers;
 
 import com.joseluisgs.walaspringboot.models.Product;
+import com.joseluisgs.walaspringboot.models.ProductCategory;
 import com.joseluisgs.walaspringboot.services.ProductService;
 import com.joseluisgs.walaspringboot.services.RatingService;
 import com.joseluisgs.walaspringboot.services.FavoriteService;
@@ -41,6 +42,12 @@ public class ZonaPublicaController {
     public List<Product> productosNoVendidos() {
         return productoServicio.productosSinVender();
     }
+    
+    // Inyectamos las categorías en el modelo para los filtros
+    @ModelAttribute("categorias")
+    public ProductCategory[] getCategorias() {
+        return ProductCategory.values();
+    }
 
 
     // Escuchamos en las dos rutas por defecto
@@ -52,19 +59,26 @@ public class ZonaPublicaController {
                         @RequestParam(name = "minPrecio", required = false) Float minPrecio,
                         @RequestParam(name = "maxPrecio", required = false) Float maxPrecio) {
 
-        List<Product> productos = productoServicio.productosSinVender();
+        List<Product> productos;
 
-        // Aplicar filtros
+        // Aplicar filtro de búsqueda por texto
         if (query != null && !query.trim().isEmpty()) {
             productos = productoServicio.buscar(query);
+        } 
+        // Aplicar filtro por categoría
+        else if (categoria != null && !categoria.trim().isEmpty()) {
+            try {
+                ProductCategory cat = ProductCategory.valueOf(categoria);
+                productos = productoServicio.findByCategoria(cat);
+            } catch (IllegalArgumentException e) {
+                // Si la categoría no es válida, mostrar todos los productos
+                productos = productoServicio.productosSinVender();
+            }
+        } else {
+            productos = productoServicio.productosSinVender();
         }
 
-        if (categoria != null && !categoria.trim().isEmpty()) {
-            productos = productos.stream()
-                    .filter(p -> categoria.equals(p.getCategoria()))
-                    .toList();
-        }
-
+        // Aplicar filtros de precio
         if (minPrecio != null && maxPrecio != null) {
             productos = productos.stream()
                     .filter(p -> p.getPrecio() >= minPrecio && p.getPrecio() <= maxPrecio)
@@ -81,7 +95,7 @@ public class ZonaPublicaController {
 
         model.addAttribute("productos", productos);
         model.addAttribute("q", query);
-        model.addAttribute("categoria", categoria);
+        model.addAttribute("categoriaActual", categoria);
         model.addAttribute("minPrecio", minPrecio);
         model.addAttribute("maxPrecio", maxPrecio);
 

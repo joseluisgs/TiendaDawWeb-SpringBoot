@@ -2,6 +2,7 @@ package com.joseluisgs.walaspringboot.repositories;
 
 import com.joseluisgs.walaspringboot.models.Purchase;
 import com.joseluisgs.walaspringboot.models.Product;
+import com.joseluisgs.walaspringboot.models.ProductCategory;
 import com.joseluisgs.walaspringboot.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,9 +17,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCompraIsNull();
     List<Product> findByNombreContainsIgnoreCaseAndCompraIsNull(String nombre);
     List<Product> findByNombreContainsIgnoreCaseAndPropietario(String nombre, User propietario);
-    List<Product> findByCategoriaAndCompraIsNull(String categoria);
     List<Product> findByPrecioBetweenAndCompraIsNull(float minPrecio, float maxPrecio);
-    List<Product> findByNombreContainsIgnoreCaseAndCategoriaAndCompraIsNull(String nombre, String categoria);
+    
+    @Query("SELECT p FROM Product p WHERE p.categoria = :categoria AND p.deleted = false AND p.compra IS NULL ORDER BY p.id DESC")
+    List<Product> findByCategoria(@Param("categoria") ProductCategory categoria);
     
     @Query("SELECT p FROM Product p WHERE p.deleted = false ORDER BY p.id DESC")
     List<Product> findAllActive();

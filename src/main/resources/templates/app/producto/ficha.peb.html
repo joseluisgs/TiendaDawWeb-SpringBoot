@@ -28,6 +28,26 @@
                         </div>
                         
                         <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ producto.descripcion | default('') }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label">
+                                <i class="bi bi-tags"></i> Categoría <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="categoria" name="categoria" required>
+                                <option value="">Selecciona una categoría</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.name }}" 
+                                        {% if producto.categoria and producto.categoria.name == categoria.name %}selected{% endif %}>
+                                    {{ categoria.displayNameWithEmoji }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
                             <label for="file" class="form-label">Imagen</label>
                             <input type="file" class="form-control" id="file" name="file">
                         </div>

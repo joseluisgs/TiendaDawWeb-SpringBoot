@@ -32,10 +32,18 @@
                     </div>
                     <div class="mb-3">
                         <h3>{{ producto.nombre }}</h3>
+                        {% if producto.categoria %}
+                        <span class="badge bg-primary fs-6">{{ producto.categoria.displayNameWithEmoji }}</span>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <h4 class="text-primary"><strong>{{ producto.precio | formatPrice }}</strong></h4>
                     </div>
+                    {% if producto.descripcion %}
+                    <div class="mb-3">
+                        <p class="text-muted">{{ producto.descripcion }}</p>
+                    </div>
+                    {% endif %}
                     
                     <!-- Rating Display -->
                     <div class="mb-3">

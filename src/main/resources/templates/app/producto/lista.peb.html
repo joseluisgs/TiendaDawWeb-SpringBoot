@@ -84,7 +84,12 @@
         <div class="col">
             <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>{{ producto.nombre }}</span>
+                    <div class="d-flex flex-column">
+                        <span>{{ producto.nombre }}</span>
+                        {% if producto.categoria %}
+                        <span class="badge bg-info mt-1" style="width: fit-content;">{{ producto.categoria.displayNameWithEmoji }}</span>
+                        {% endif %}
+                    </div>
                     {% if producto.compra is null %}
                     <button class="btn-close" data-bs-target="#deleteModal" data-bs-toggle="modal" data-id="{{ producto.id }}"
                             type="button"></button>

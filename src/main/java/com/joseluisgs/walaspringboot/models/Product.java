@@ -25,7 +25,9 @@ public class Product {
     @Column(length = 1000)
     private String descripcion;
 
-    private String categoria;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categoria", nullable = false)
+    private ProductCategory categoria;
 
     @ManyToOne
     private User propietario;
@@ -57,7 +59,7 @@ public class Product {
         this.precio = precio;
         this.imagen = imagen;
         this.descripcion = descripcion;
-        this.categoria = categoria;
+        this.categoria = ProductCategory.fromString(categoria);
         this.propietario = propietario;
     }
 
@@ -117,11 +119,11 @@ public class Product {
         this.descripcion = descripcion;
     }
 
-    public String getCategoria() {
+    public ProductCategory getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(String categoria) {
+    public void setCategoria(ProductCategory categoria) {
         this.categoria = categoria;
     }
 
@@ -190,6 +192,8 @@ public class Product {
                 ", nombre='" + nombre + '\'' +
                 ", precio=" + precio +
                 ", imagen='" + imagen + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                ", categoria=" + categoria +
                 ", propietario=" + propietario +
                 ", compra=" + compra +
                 '}';
