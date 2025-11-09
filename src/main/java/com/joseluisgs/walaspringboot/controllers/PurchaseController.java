@@ -8,7 +8,6 @@ import com.joseluisgs.walaspringboot.services.ProductService;
 import com.joseluisgs.walaspringboot.services.UserService;
 import com.joseluisgs.walaspringboot.services.EmailService;
 import com.joseluisgs.walaspringboot.utils.GeneradorPDF;
-import com.joseluisgs.walaspringboot.utils.Html2PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -43,10 +42,6 @@ public class PurchaseController {
     // Para las sesiones
     @Autowired
     HttpSession session;
-
-    // Para PDF
-    @Autowired
-    Html2PdfService documentGeneratorService;
 
     // Para Email
     @Autowired
@@ -218,8 +213,8 @@ public class PurchaseController {
         return "/app/compra/factura";
     }
 
-    // Saco una factura en PDF usando itex - Route standardized to /miscompras/factura/{id}/pdf
-    @RequestMapping(value = {"/miscompras/factura/{id}/pdf", "/miscompras/factura/pdf/{id}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+    // Saco una factura en PDF usando itex - Simple and working version
+    @RequestMapping(value = "/miscompras/factura/{id}/pdf", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<InputStreamResource> facturaPDF(@PathVariable Long id) {
         // Recupero la compra mediante su ID
         Purchase compra = compraServicio.buscarPorId(id);
@@ -238,37 +233,6 @@ public class PurchaseController {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(bis));
-    }
-
-    // Saco la factura generada con el servicio HTML2PDF - Alternative beautiful PDF
-    @RequestMapping(value = {"/miscompras/factura/{id}/html2pdf", "/miscompras/pdf/factura/{id}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity facturaHTML2PDF(@PathVariable Long id) {
-        // Cargamos los datos
-        // Recupero la compra mediante su ID
-        Purchase compra = compraServicio.buscarPorId(id);
-        // Obtengo la lista de productos por su id asociados a la compra
-        List<Product> productos = productoServicio.productosDeUnaCompra(compra);
-        // Total de la compra
-        Double total = productos.stream().mapToDouble(p -> p.getPrecio()).sum();
-
-        Map<String, Object> data = new TreeMap<>();
-        String factura = "factura_"+ compra.getId();
-        data.put("factura", factura);
-        data.put("compra", compra);
-        data.put("productos", productos);
-        data.put("total", total);
-        data.put("subtotal", (total/1.21));
-        data.put("iva", (total-(total/1.21)));
-
-        InputStreamResource resource = documentGeneratorService.html2PdfGenerator(data);
-        if (resource != null) {
-            return ResponseEntity
-                    .ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(resource);
-        } else {
-            return new ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE);
-        }
     }
 
 

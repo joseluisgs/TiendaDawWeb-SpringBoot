@@ -113,20 +113,13 @@ public class FileSystemStorageService implements StorageService{
     public Resource loadAsResource(String filename) {
         try {
             Path file = load(filename);
-            // Additional security: validate the resolved path is within rootLocation
-            if (!file.normalize().startsWith(this.rootLocation.toAbsolutePath())) {
-                throw new StorageFileNotFoundException("Cannot read file outside storage directory");
-            }
             Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
+            if (resource.exists() && resource.isReadable()) {
                 return resource;
+            } else {
+                throw new StorageFileNotFoundException("Could not read file: " + filename);
             }
-            else {
-                throw new StorageFileNotFoundException(
-                        "Could not read file: " + filename);
-            }
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new StorageFileNotFoundException("Could not read file: " + filename, e);
         }
     }
