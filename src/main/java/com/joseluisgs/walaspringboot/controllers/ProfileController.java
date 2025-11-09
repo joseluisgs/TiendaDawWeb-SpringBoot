@@ -49,10 +49,11 @@ public class ProfileController {
         existingUser.setNombre(updatedUser.getNombre());
         existingUser.setApellidos(updatedUser.getApellidos());
 
-        // Handle avatar upload
+        // Handle avatar upload - ONLY process if a new file is uploaded
         if (file != null && !file.isEmpty()) {
-            // Delete old avatar if exists
-            if (existingUser.getAvatar() != null && !existingUser.getAvatar().isEmpty()) {
+            // Delete old avatar if exists and is NOT an external URL
+            if (existingUser.getAvatar() != null && !existingUser.getAvatar().isEmpty() 
+                && !isExternalUrl(existingUser.getAvatar())) {
                 storageService.delete(existingUser.getAvatar());
             }
             // Upload new avatar
@@ -60,11 +61,19 @@ public class ProfileController {
             existingUser.setAvatar(MvcUriComponentsBuilder
                     .fromMethodName(FilesController.class, "serveFile", avatar).build().toUriString());
         }
+        // If NO new file, keep current avatar (external URL or local file)
 
         userService.editar(existingUser);
         model.addAttribute("mensaje", "Perfil actualizado correctamente");
         model.addAttribute("usuario", existingUser);
         
         return "app/perfil";
+    }
+    
+    /**
+     * Helper method to check if a path is an external URL
+     */
+    private boolean isExternalUrl(String path) {
+        return path != null && (path.startsWith("http://") || path.startsWith("https://"));
     }
 }

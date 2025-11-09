@@ -1,0 +1,51 @@
+# Git
+.git/
+.gitignore
+.github/
+
+# Gradle
+.gradle/
+build/
+!build/libs/*.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Docker
+docker-volumes/
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+docs/
+*.md
+!src/**/*.md
+
+# Test files
+src/test/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Upload directory (will be created in container)
+upload-dir/
+
+# Database files (will be created in container)
+waladaw.mv.db
+waladaw.trace.db
+database/

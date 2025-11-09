@@ -1,5 +1,6 @@
 package com.joseluisgs.walaspringboot.controllers;
 
+import com.joseluisgs.walaspringboot.config.AppConstants;
 import com.joseluisgs.walaspringboot.models.Product;
 import com.joseluisgs.walaspringboot.models.User;
 import com.joseluisgs.walaspringboot.services.ProductService;
@@ -129,7 +130,17 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute("appName")
     public String getAppName() {
-        return "WalaDaw";
+        return AppConstants.APP_NAME;
+    }
+    
+    @ModelAttribute("appDescription")
+    public String getAppDescription() {
+        return AppConstants.APP_DESCRIPTION;
+    }
+    
+    @ModelAttribute("appVersion")
+    public String getAppVersion() {
+        return AppConstants.APP_VERSION;
     }
 
     @ModelAttribute("currentDateTime")

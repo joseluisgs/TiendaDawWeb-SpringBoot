@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  waladaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: waladaw-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Volume for uploaded files (upload-dir/)
+      - upload-data:/app/upload-dir
+      # Volume for H2 database files
+      - database-data:/app/database
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    networks:
+      - waladaw-network
+    depends_on:
+      waladaw-db-init:
+        condition: service_completed_successfully
+
+  # Auxiliary service to initialize directories with correct permissions
+  waladaw-db-init:
+    image: alpine:latest
+    container_name: waladaw-init
+    volumes:
+      - database-data:/data
+      - upload-data:/uploads
+    command: >
+      sh -c "
+        chown -R 1000:1000 /data &&
+        chown -R 1000:1000 /uploads &&
+        echo 'Directorios inicializados correctamente'
+      "
+
+volumes:
+  # Volume for user uploaded files (upload-dir)
+  upload-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./docker-volumes/upload-data
+      
+  # Volume for H2 database files
+  database-data:
+    driver: local
+    driver_opts:
+      type: none  
+      o: bind
+      device: ./docker-volumes/database-data
+
+networks:
+  waladaw-network:
+    driver: bridge
