@@ -7,6 +7,10 @@ import com.joseluisgs.walaspringboot.services.RatingService;
 import com.joseluisgs.walaspringboot.services.FavoriteService;
 import com.joseluisgs.walaspringboot.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,45 +61,45 @@ public class ZonaPublicaController {
                         @RequestParam(name = "q", required = false) String query,
                         @RequestParam(name = "categoria", required = false) String categoria,
                         @RequestParam(name = "minPrecio", required = false) Float minPrecio,
-                        @RequestParam(name = "maxPrecio", required = false) Float maxPrecio) {
+                        @RequestParam(name = "maxPrecio", required = false) Float maxPrecio,
+                        @RequestParam(name = "page", defaultValue = "0") int page,
+                        @RequestParam(name = "size", defaultValue = "12") int size) {
 
-        List<Product> productos;
-
-        // Aplicar filtro de búsqueda por texto
+        // Crear Pageable
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        
+        // Buscar con filtros y paginación
+        Page<Product> productosPage;
+        
         if (query != null && !query.trim().isEmpty()) {
-            productos = productoServicio.buscar(query);
-        } 
-        // Aplicar filtro por categoría
-        else if (categoria != null && !categoria.trim().isEmpty()) {
+            productosPage = productoServicio.findByNombreContainingIgnoreCase(query, pageable);
+        } else if (categoria != null && !categoria.isEmpty()) {
             try {
                 ProductCategory cat = ProductCategory.valueOf(categoria);
-                productos = productoServicio.findByCategoria(cat);
+                productosPage = productoServicio.findByCategoria(cat, pageable);
             } catch (IllegalArgumentException e) {
-                // Si la categoría no es válida, mostrar todos los productos
-                productos = productoServicio.productosSinVender();
+                productosPage = productoServicio.findAll(pageable);
             }
+        } else if (minPrecio != null || maxPrecio != null) {
+            Float min = minPrecio != null ? minPrecio : 0f;
+            Float max = maxPrecio != null ? maxPrecio : Float.MAX_VALUE;
+            productosPage = productoServicio.findByPrecioBetween(min, max, pageable);
         } else {
-            productos = productoServicio.productosSinVender();
+            productosPage = productoServicio.findAll(pageable);
         }
-
-        // Aplicar filtros de precio
-        if (minPrecio != null && maxPrecio != null) {
-            productos = productos.stream()
-                    .filter(p -> p.getPrecio() >= minPrecio && p.getPrecio() <= maxPrecio)
-                    .toList();
-        } else if (minPrecio != null) {
-            productos = productos.stream()
-                    .filter(p -> p.getPrecio() >= minPrecio)
-                    .toList();
-        } else if (maxPrecio != null) {
-            productos = productos.stream()
-                    .filter(p -> p.getPrecio() <= maxPrecio)
-                    .toList();
-        }
-
-        model.addAttribute("productos", productos);
-        model.addAttribute("q", query);
+        
+        // Pasar datos a la vista
+        model.addAttribute("productos", productosPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productosPage.getTotalPages());
+        model.addAttribute("totalElements", productosPage.getTotalElements());
+        model.addAttribute("size", size);
+        model.addAttribute("hasNext", productosPage.hasNext());
+        model.addAttribute("hasPrevious", productosPage.hasPrevious());
+        
+        // Mantener filtros
         model.addAttribute("categoriaActual", categoria);
+        model.addAttribute("q", query);
         model.addAttribute("minPrecio", minPrecio);
         model.addAttribute("maxPrecio", maxPrecio);
 

@@ -39,3 +39,4 @@ upload-dir/
 # H2 Database files
 walaspringboot.mv.db
 walaspringboot.trace.db
+wget-log
