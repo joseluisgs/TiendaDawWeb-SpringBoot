@@ -215,9 +215,10 @@ DB_PASSWORD=secure_password
 
 ### Tutoriales Incluidos
 
-- **[SpringMVC.md](SpringMVC.md)**: Tutorial completo de Spring MVC
-- **[Pebble.md](Pebble.md)**: Guía del motor de plantillas Pebble
-- **[SECURITY.md](SECURITY.md)**: Resumen de seguridad del proyecto
+- **[SpringMVC.md](SpringMVC.md)**: Tutorial completo de Spring MVC.
+- **[Pebble.md](Pebble.md)**: Guía del motor de plantillas Pebble.
+- **[GlobalAdvice.md](GlobalAdvice.md)**: Variables Globales del Proyecto, exposición a vistas.
+- **[SECURITY.md](SECURITY.md)**: Resumen de seguridad del proyecto.
 
 ## 📝 Licencia
 
