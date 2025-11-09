@@ -3,9 +3,7 @@ package com.joseluisgs.walaspringboot.controllers;
 import com.joseluisgs.walaspringboot.models.User;
 import com.joseluisgs.walaspringboot.services.UserService;
 import com.joseluisgs.walaspringboot.storage.StorageService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,14 +31,8 @@ public class LoginController {
     }
 
     @GetMapping("/auth/login")
-    public String login(Model model, HttpServletRequest request) {
-        // ⭐ AÑADIR CSRF TOKEN ⭐
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        if (csrfToken != null) {
-            model.addAttribute("csrfToken", csrfToken.getToken());
-            model.addAttribute("csrfParamName", csrfToken.getParameterName());
-        }
-
+    public String login(Model model) {
+        // CSRF token is handled by GlobalControllerAdvice
         // Para el formulario de registro
         model.addAttribute("usuario", new User());
         return "login";

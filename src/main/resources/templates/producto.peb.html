@@ -154,7 +154,7 @@ function getCsrfToken() {
     return document.querySelector('meta[name="_csrf"]').getAttribute('content');
 }
 
-function getCsrfHeader() {
+function getCsrfParamName() {
     return document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 }
 
@@ -163,14 +163,12 @@ function toggleFavorite(productoId) {
     const method = isFavorite ? 'DELETE' : 'POST';
     const url = isFavorite ? `/app/favoritos/remove/${productoId}` : `/app/favoritos/add/${productoId}`;
     
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    headers[getCsrfHeader()] = getCsrfToken();
+    const formData = new FormData();
+    formData.append(getCsrfParamName(), getCsrfToken());
     
     fetch(url, {
         method: method,
-        headers: headers
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -206,21 +204,16 @@ function submitRating(productoId) {
         return;
     }
     
-    const formData = new URLSearchParams();
+    const formData = new FormData();
     formData.append('productoId', productoId);
     formData.append('puntuacion', rating.value);
     if (comentario) {
         formData.append('comentario', comentario);
     }
-    
-    const headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    };
-    headers[getCsrfHeader()] = getCsrfToken();
+    formData.append(getCsrfParamName(), getCsrfToken());
     
     fetch('/app/ratings/add', {
         method: 'POST',
-        headers: headers,
         body: formData
     })
     .then(response => response.json())
