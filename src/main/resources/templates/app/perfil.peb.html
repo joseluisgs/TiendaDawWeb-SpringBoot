@@ -5,126 +5,135 @@
 <body class="d-flex flex-column min-vh-100">
 {% include "fragments/navbar" %}
 
-<div class="container mt-5 pt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+<div class="container py-4 mt-5 pt-3">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2><i class="bi bi-person-circle"></i> Mi Perfil</h2>
+        </div>
+    </div>
+    
+    {% if mensaje %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> {{ mensaje }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row g-4">
+        <!-- COLUMNA 1: DATOS PERSONALES -->
+        <div class="col-lg-8">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-person-circle"></i> Mi Perfil</h4>
+                    <h5 class="mb-0"><i class="bi bi-person-fill"></i> Datos Personales</h5>
                 </div>
                 <div class="card-body">
-                    {% if mensaje %}
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle"></i> {{ mensaje }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <!-- Avatar principal -->
+                    <div class="text-center mb-4">
+                        <img src="{% if usuario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ usuario.email }}.png{% else %}{{ usuario.avatar }}{% endif %}" 
+                             alt="Avatar" 
+                             class="rounded-circle border border-3 border-primary" 
+                             width="120" height="120"
+                             style="object-fit: cover;">
+                        <h4 class="mt-3 fw-bold">{{ usuario.nombre }} {{ usuario.apellidos }}</h4>
+                        <span class="badge bg-{% if usuario.rol == 'ADMIN' %}danger{% elseif usuario.rol == 'MODERATOR' %}warning{% else %}secondary{% endif %}">
+                            {{ usuario.rol }}
+                        </span>
                     </div>
-                    {% endif %}
-
-                    <!-- Vendor Card Section -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="card vendor-card shadow">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Tu perfil como vendedor</h5>
-                                </div>
-                                <div class="card-body text-center">
-                                    <!-- Avatar usuario -->
-                                    <div class="mb-3">
-                                        <img alt="Avatar" 
-                                             class="rounded-circle border border-3 border-primary" 
-                                             src="{% if usuario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ usuario.email }}.png{% else %}{{ usuario.avatar }}{% endif %}" 
-                                             style="width: 100px; height: 100px; object-fit: cover;">
-                                    </div>
-                                    
-                                    <!-- Nombre completo -->
-                                    <h4 class="fw-bold text-primary">{{ usuario.nombre }} {{ usuario.apellidos }}</h4>
-                                    <p class="text-muted">Miembro desde {{ usuario.fechaAlta | date('MMMM yyyy') }}</p>
-                                    
-                                    <!-- Valoración vendedor -->
-                                    <div class="mb-4">
-                                        <h6>Valoración del vendedor:</h6>
-                                        <div class="mb-2">
-                                            <span class="text-warning fs-5">
-                                                <i class="bi bi-star-fill"></i>
-                                                <i class="bi bi-star-fill"></i>
-                                                <i class="bi bi-star-fill"></i>
-                                                <i class="bi bi-star-fill"></i>
-                                                <i class="bi bi-star-half"></i>
-                                            </span>
-                                            <strong class="ms-2 fs-4">4.7</strong>
-                                        </div>
-                                        <small class="text-muted">(89 opiniones)</small>
-                                    </div>
-                                    
-                                    <!-- Estadísticas -->
-                                    <div class="row text-center">
-                                        <div class="col-6 border-end">
-                                            <strong class="d-block text-primary fs-3">45</strong>
-                                            <small class="text-muted">Productos</small>
-                                        </div>
-                                        <div class="col-6">
-                                            <strong class="d-block text-success fs-3">32</strong>
-                                            <small class="text-muted">Ventas</small>
-                                        </div>
-                                    </div>
-                                </div>
+                    
+                    <!-- Formulario editable -->
+                    <form method="post" action="/app/perfil/editar" enctype="multipart/form-data">
+                        <input type="hidden" name="{{ csrfParamName }}" value="{{ csrfToken }}"/>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" name="nombre" value="{{ usuario.nombre }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Apellidos</label>
+                                <input type="text" class="form-control" name="apellidos" value="{{ usuario.apellidos }}" required>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-4 text-center">
-                            <img alt="Avatar" 
-                                 class="img-fluid rounded-circle shadow mb-3" 
-                                 src="{% if usuario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ usuario.email }}.png{% else %}{{ usuario.avatar }}{% endif %}" 
-                                 style="width: 200px; height: 200px; object-fit: cover;">
-                            <p class="text-muted small">{{ usuario.email }}</p>
-                            <span class="badge bg-{% if usuario.rol == 'ADMIN' %}danger{% elseif usuario.rol == 'MODERATOR' %}warning{% else %}info{% endif %}">
-                                {{ usuario.rol }}
-                            </span>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ usuario.email }}" disabled>
+                            <small class="text-muted">El email no se puede modificar</small>
                         </div>
-                        <div class="col-md-8">
-                            <form action="/app/perfil/editar" method="post" enctype="multipart/form-data">
-                                <input type="hidden" name="{{ csrfParamName }}" value="{{ csrfToken }}"/>
-                                
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" 
-                                           value="{{ usuario.nombre }}" required>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="apellidos" class="form-label">Apellidos</label>
-                                    <input type="text" class="form-control" id="apellidos" name="apellidos" 
-                                           value="{{ usuario.apellidos }}" required>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" 
-                                           value="{{ usuario.email }}" disabled>
-                                    <small class="text-muted">El email no se puede modificar</small>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="file" class="form-label">Cambiar Avatar</label>
-                                    <input type="file" class="form-control" id="file" name="file" accept="image/*">
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Fecha de Alta</label>
-                                    <p class="form-control-plaintext">{{ usuario.fechaAlta | formatDate }}</p>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save"></i> Guardar Cambios
-                                    </button>
-                                    <a href="/public" class="btn btn-secondary">
-                                        <i class="bi bi-arrow-left"></i> Volver
-                                    </a>
-                                </div>
-                            </form>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Cambiar Avatar</label>
+                            <input type="file" class="form-control" name="file" accept="image/*">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de Alta</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ usuario.fechaAlta | formatDateTime }}" disabled>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Actualizar Perfil
+                        </button>
+                        <a href="/public" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COLUMNA 2: ESTADÍSTICAS VENDEDOR -->
+        <div class="col-lg-4">
+            <div class="card shadow border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Tu perfil como vendedor</h5>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Avatar pequeño -->
+                    <div class="mb-3">
+                        <img src="{% if usuario.avatar is empty %}https://api.dicebear.com/7.x/avataaars/svg?seed={{ usuario.email }}.png{% else %}{{ usuario.avatar }}{% endif %}" 
+                             alt="Avatar vendedor" 
+                             class="rounded-circle border border-2 border-primary" 
+                             width="80" height="80"
+                             style="object-fit: cover;">
+                    </div>
+                    
+                    <!-- Nombre vendedor -->
+                    <h5 class="fw-bold text-primary mb-1">{{ usuario.nombre }} {{ usuario.apellidos }}</h5>
+                    <p class="text-muted mb-4">
+                        Miembro desde {{ usuario.fechaAlta | formatMonth }} {{ currentYear }}
+                    </p>
+                    
+                    <!-- Valoración vendedor -->
+                    <div class="mb-4">
+                        <h6 class="mb-2">Valoración del vendedor:</h6>
+                        <div class="mb-2">
+                            <span class="text-warning fs-5">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </span>
+                            <strong class="ms-2 fs-4 text-primary">4.7</strong>
+                        </div>
+                        <small class="text-muted">(89 opiniones)</small>
+                    </div>
+                    
+                    <!-- Estadísticas -->
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <strong class="d-block text-primary fs-3">45</strong>
+                            <small class="text-muted">Productos</small>
+                        </div>
+                        <div class="col-6">
+                            <strong class="d-block text-success fs-3">32</strong>
+                            <small class="text-muted">Ventas</small>
                         </div>
                     </div>
                 </div>

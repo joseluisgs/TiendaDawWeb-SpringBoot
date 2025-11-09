@@ -349,7 +349,7 @@ public String getFilesPath() {
 ```java
 @ModelAttribute("appName")
 public String getAppName() {
-    return "WalaSpringBoot";
+    return "WalaDaw";
 }
 ```
 
@@ -552,7 +552,7 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute("appName")
     public String getAppName() {
-        return "WalaSpringBoot";
+        return "WalaDaw";
     }
 
     @ModelAttribute("currentDateTime")
@@ -838,5 +838,5 @@ public int getCartItemCount(HttpServletRequest request) {
 ---
 
 **Última actualización:** Noviembre 2025  
-**Proyecto:** WalaSpringBoot Marketplace  
+**Proyecto:** WalaDaw Marketplace  
 **Documentación completa de variables globales disponibles en todas las vistas**

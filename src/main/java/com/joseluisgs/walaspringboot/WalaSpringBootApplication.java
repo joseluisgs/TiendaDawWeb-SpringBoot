@@ -67,7 +67,7 @@ public class WalaSpringBootApplication {
                 System.out.println("\n" + DataFactory.getDataSummary());
                 System.out.println("\n🚀 Marketplace inicializado correctamente!");
                 System.out.println("🌐 Acceso: http://localhost:8080/public");
-                System.out.println("🔑 Login admin: admin@walaspringboot.com / admin");
+                System.out.println("🔑 Login admin: admin@waladaw.com / admin");
 
             } catch (Exception e) {
                 System.err.println("❌ Error inicializando datos de prueba: " + e.getMessage());

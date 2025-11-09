@@ -117,7 +117,7 @@ public class GeneradorPDF {
             documento.add(new Paragraph("Esperamos que disfrutes de tus productos.", 
                 FontFactory.getFont("Arial", 10, Font.NORMAL, BaseColor.GRAY)));
             documento.add(new Paragraph(" "));
-            documento.add(new Paragraph("📞 Atención al cliente: admin@walaspringboot.com", 
+            documento.add(new Paragraph("📞 Atención al cliente: admin@waladaw.com", 
                 FontFactory.getFont("Arial", 9, Font.NORMAL, BaseColor.GRAY)));
             documento.add(new Paragraph("🌐 Web: localhost:8080", 
                 FontFactory.getFont("Arial", 9, Font.NORMAL, BaseColor.GRAY)));

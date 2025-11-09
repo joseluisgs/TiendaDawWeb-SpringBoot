@@ -24,11 +24,11 @@ public class DataFactory {
     public static List<User> createTestUsers() {
         return Arrays.asList(
                 new User("Admin", "Administrador", "https://robohash.org/admin?size=200x200&bgset=bg1",
-                        "admin@walaspringboot.com", "admin", "ADMIN"),
+                        "admin@waladaw.com", "admin", "ADMIN"),
                 new User("Prueba", "Probando Mucho", "https://robohash.org/prueba?size=200x200&bgset=bg2",
                         "prueba@prueba.com", "prueba", "USER"),
                 new User("Moderador", "User", "https://api.dicebear.com/7.x/avataaars/svg?seed=moderador&backgroundColor=b6e3f4",
-                        "moderador@walaspringboot.com", "moderador", "MODERATOR"),
+                        "moderador@waladaw.com", "moderador", "MODERATOR"),
                 new User("Otro", "User", "https://api.dicebear.com/7.x/personas/svg?seed=otro&backgroundColor=c0aede",
                         "otro@otro.com", "otro", "USER"),
                 new User("María", "García López", "https://api.dicebear.com/7.x/avataaars/svg?seed=maria&backgroundColor=ffd5dc",

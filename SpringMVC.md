@@ -476,7 +476,7 @@ public class BaseController {
     
     @ModelAttribute("appName")
     public String appName() {
-        return "WalaSpringBoot";
+        return "WalaDaw";
     }
     
     @ModelAttribute("authenticated")
@@ -851,7 +851,7 @@ public class CarritoAdvice {
 {# templates/fragments/navbar.peb #}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/">WalaSpringBoot</a>
+        <a class="navbar-brand" href="/">WalaDaw</a>
         
         <ul class="navbar-nav ms-auto">
             <li class="nav-item">
@@ -2548,7 +2548,7 @@ public class GlobalExceptionHandler {
 
 ## Marketplace Patterns
 
-Patrones específicos implementados en la aplicación de marketplace WalaSpringBoot.
+Patrones específicos implementados en la aplicación de marketplace WalaDaw.
 
 ### Shopping Cart Session Pattern
 
@@ -3372,4 +3372,4 @@ document.querySelector('form').addEventListener('submit', function(e) {
 ---
 
 **Actualizado con casos reales:** Noviembre 2025  
-**Proyecto:** WalaSpringBoot Marketplace
+**Proyecto:** WalaDaw Marketplace

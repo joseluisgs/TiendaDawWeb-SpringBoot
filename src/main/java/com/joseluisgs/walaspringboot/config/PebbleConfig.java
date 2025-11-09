@@ -30,6 +30,8 @@ public class PebbleConfig {
                 Map<String, Filter> filters = new HashMap<>();
                 filters.put("formatDate", new FormatDateFilter());
                 filters.put("formatPrice", new FormatPriceFilter());
+                filters.put("formatMonth", new FormatMonthFilter());
+                filters.put("formatDateTime", new FormatDateTimeFilter());
                 return filters;
             }
         };
@@ -60,6 +62,64 @@ public class PebbleConfig {
                     } catch (Exception e) {
                         return input.toString();
                     }
+                }
+            } catch (Exception e) {
+                return input.toString();
+            }
+            
+            return input.toString();
+        }
+
+        @Override
+        public List<String> getArgumentNames() {
+            return null;
+        }
+    }
+
+    // Filtro para formatear mes de una fecha
+    private static class FormatMonthFilter implements Filter {
+        @Override
+        public Object apply(Object input, Map<String, Object> args, io.pebbletemplates.pebble.template.PebbleTemplate self,
+                          io.pebbletemplates.pebble.template.EvaluationContext context, int lineNumber) throws io.pebbletemplates.pebble.error.PebbleException {
+            if (input == null) {
+                return "";
+            }
+
+            try {
+                if (input instanceof LocalDateTime) {
+                    LocalDateTime dateTime = (LocalDateTime) input;
+                    return dateTime.getMonth().getDisplayName(
+                        java.time.format.TextStyle.FULL, 
+                        new Locale("es", "ES")
+                    );
+                }
+            } catch (Exception e) {
+                return "";
+            }
+            
+            return "";
+        }
+
+        @Override
+        public List<String> getArgumentNames() {
+            return null;
+        }
+    }
+
+    // Filtro para formatear fecha y hora completa
+    private static class FormatDateTimeFilter implements Filter {
+        @Override
+        public Object apply(Object input, Map<String, Object> args, io.pebbletemplates.pebble.template.PebbleTemplate self,
+                          io.pebbletemplates.pebble.template.EvaluationContext context, int lineNumber) throws io.pebbletemplates.pebble.error.PebbleException {
+            if (input == null) {
+                return "";
+            }
+
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", new Locale("es", "ES"));
+                
+                if (input instanceof LocalDateTime) {
+                    return ((LocalDateTime) input).format(formatter);
                 }
             } catch (Exception e) {
                 return input.toString();

@@ -1,4 +1,4 @@
-# 🛒 WalaSpringBoot - Tienda de Segunda Mano 2025
+# 🛒 WalaDaw - Tienda de Segunda Mano 2025
 
 [![Java](https://img.shields.io/badge/Java-21-orange)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.0-brightgreen)](https://spring.io/projects/spring-boot)
@@ -177,9 +177,9 @@ La aplicación inicializa automáticamente con usuarios de diferentes roles:
 
 | Email | Password | Rol | Descripción |
 |-------|----------|-----|-------------|
-| `admin@walaspringboot.com` | `admin` | **ADMIN** | Acceso total al dashboard y gestión |
+| `admin@waladaw.com` | `admin` | **ADMIN** | Acceso total al dashboard y gestión |
 | `prueba@prueba.com` | `prueba` | **USER** | Usuario estándar con sus productos |
-| `moderador@walaspringboot.com` | `moderador` | **MODERATOR** | Permisos intermedios |
+| `moderador@waladaw.com` | `moderador` | **MODERATOR** | Permisos intermedios |
 | `otro@otro.com` | `otro` | **USER** | Otro usuario estándar |
 
 ### Flujo de Usuario Normal
@@ -193,7 +193,7 @@ La aplicación inicializa automáticamente con usuarios de diferentes roles:
 
 ### Flujo de Administrador
 
-1. **Login**: Inicia sesión como `admin@walaspringboot.com`
+1. **Login**: Inicia sesión como `admin@waladaw.com`
 2. **Dashboard**: Accede al panel de control desde el menú superior
 3. **Estadísticas**: Visualiza métricas de productos, usuarios y compras
 4. **Gestión de Usuarios**: Administra los usuarios registrados
@@ -210,7 +210,7 @@ La aplicación inicializa automáticamente con usuarios de diferentes roles:
 Accede a la consola de base de datos en modo desarrollo:
 
 - URL: **http://localhost:8080/h2-console**
-- JDBC URL: `jdbc:h2:./walaspringboot`
+- JDBC URL: `jdbc:h2:./waladaw`
 - Usuario: `sa`
 - Contraseña: *(vacío)*
 
@@ -254,7 +254,7 @@ spring.profiles.active=prod
 ```
 
 **Configuración:**
-- 💾 **Base de datos**: H2 en fichero (`walaspringboot.mv.db`) para persistencia real
+- 💾 **Base de datos**: H2 en fichero (`waladaw.mv.db`) para persistencia real
 - 🚫 **Datos de prueba**: **NO se cargan** automáticamente
 - 📁 **Storage**: El directorio de uploads **NO se borra**, mantiene los archivos
 - 📊 **Logging**: Nivel WARN optimizado para producción

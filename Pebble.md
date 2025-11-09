@@ -845,7 +845,7 @@ filters.put("fd", new FormatDateFilter());
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}WalaSpringBoot{% endblock %}</title>
+    <title>{% block title %}WalaDaw{% endblock %}</title>
     
     {% block styles %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -866,7 +866,7 @@ filters.put("fd", new FormatDateFilter());
     
     <footer class="mt-5 py-3 bg-light">
         {% block footer %}
-        <p class="text-center">&copy; 2025 WalaSpringBoot</p>
+        <p class="text-center">&copy; 2025 WalaDaw</p>
         {% endblock %}
     </footer>
     
@@ -2474,4 +2474,4 @@ private static class FormatPriceFilter implements Filter { ... }
 ---
 
 **Actualizado con ejemplos reales:** Noviembre 2025  
-**Proyecto:** WalaSpringBoot Marketplace
+**Proyecto:** WalaDaw Marketplace

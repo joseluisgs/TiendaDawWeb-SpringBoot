@@ -129,11 +129,24 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute("appName")
     public String getAppName() {
-        return "WalaSpringBoot";
+        return "WalaDaw";
     }
 
     @ModelAttribute("currentDateTime")
     public java.time.LocalDateTime getCurrentDateTime() {
         return java.time.LocalDateTime.now();
+    }
+
+    @ModelAttribute("currentYear")
+    public int getCurrentYear() {
+        return java.time.LocalDate.now().getYear();
+    }
+
+    @ModelAttribute("currentMonth")
+    public String getCurrentMonth() {
+        return java.time.LocalDate.now().getMonth().getDisplayName(
+            java.time.format.TextStyle.FULL, 
+            new java.util.Locale("es", "ES")
+        );
     }
 }

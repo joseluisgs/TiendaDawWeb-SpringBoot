@@ -167,7 +167,7 @@ public class AdminController {
             }
             
             // Verificar si es el usuario admin principal
-            if ("admin@walaspringboot.com".equals(usuario.getEmail())) {
+            if ("admin@waladaw.com".equals(usuario.getEmail())) {
                 redirectAttributes.addFlashAttribute("error", 
                     "No se puede eliminar el usuario administrador principal.");
                 return "redirect:/admin/usuarios";
