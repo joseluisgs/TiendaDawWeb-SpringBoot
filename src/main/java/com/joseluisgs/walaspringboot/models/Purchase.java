@@ -1,9 +1,9 @@
 package com.joseluisgs.walaspringboot.models;
 
+import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
@@ -51,6 +51,7 @@ public class Purchase {
     public void setPropietario(User propietario) {
         this.propietario = propietario;
     }
+
 
     @Override
     public boolean equals(Object o) {

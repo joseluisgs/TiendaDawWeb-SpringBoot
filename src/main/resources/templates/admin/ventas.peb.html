@@ -31,32 +31,35 @@
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Fecha</th>
-                            <th>Comprador</th>
-                            <th>Email</th>
-                            <th>Productos</th>
-                            <th>Acciones</th>
-                        </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Comprador</th>
+                        <th>Email</th>
+                        <th>Precio Total (€)</th>
+                        <th>Acciones</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for compra in compras %}
-                        <tr>
-                            <td>{{ compra.id }}</td>
-                            <td>{{ compra.fechaCompra | formatDate }}</td>
-                            <td>{{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</td>
-                            <td>{{ compra.propietario.email }}</td>
-                            <td>
-                                <a href="/app/miscompras/factura/{{ compra.id }}/pdf" class="btn btn-outline-primary btn-sm" target="_blank">
-                                    <i class="bi bi-file-pdf"></i> Ver PDF
-                                </a>
-                                <a href="/app/miscompras/factura/{{ compra.id }}" class="btn btn-outline-info btn-sm">
-                                    <i class="bi bi-eye"></i> Ver Detalle
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                    {% for compra in compras %}
+                    <tr>
+                        <td>{{ compra.id }}</td>
+                        <td>{{ compra.fechaCompra | formatDate }}</td>
+                        <td>{{ compra.propietario.nombre }} {{ compra.propietario.apellidos }}</td>
+                        <td>{{ compra.propietario.email }}</td>
+                        <td>{{ compra.total | formatPrice }}</td>
+                        <!-- Botón para ver la factura y el detalle de la compra -->
+                        <td>
+                            <a class="btn btn-outline-primary btn-sm" href="/app/miscompras/factura/{{ compra.id }}/pdf"
+                               target="_blank">
+                                <i class="bi bi-file-pdf"></i> Ver PDF
+                            </a>
+                            <a class="btn btn-outline-info btn-sm" href="/app/miscompras/factura/{{ compra.id }}">
+                                <i class="bi bi-eye"></i> Ver Detalle
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -67,6 +70,8 @@
 
 {% include "fragments/footer" %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script crossorigin="anonymous"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
