@@ -28,28 +28,37 @@ import java.util.List;
 public class PurchaseController {
     // Necesitamos los siguientes servicios
     // Para manejar la compra
-    @Autowired
+    final
     PurchaseService compraServicio;
 
     // Para manejar los productos
-    @Autowired
+    final
     ProductService productoServicio;
 
     // Para los usuarios
-    @Autowired
+    final
     UserService usuarioServicio;
 
     // Para las sesiones
-    @Autowired
+    final
     HttpSession session;
 
     // Para Email
-    @Autowired
+    final
     EmailService emailService;
 
 
     // Para mapear el usuario identificado con lo que tenemos almacenado
     private User usuario;
+
+    @Autowired
+    public PurchaseController(PurchaseService compraServicio, ProductService productoServicio, UserService usuarioServicio, HttpSession session, EmailService emailService) {
+        this.compraServicio = compraServicio;
+        this.productoServicio = productoServicio;
+        this.usuarioServicio = usuarioServicio;
+        this.session = session;
+        this.emailService = emailService;
+    }
 
     // Los metodos etiquetados como ModelAtribute, pornen en el modelo el resultado de realizar esta operación
     // Luego lo podremos recuperar en la vista
@@ -107,8 +116,11 @@ public class PurchaseController {
         if (contenido == null)
             contenido = new ArrayList<>();
         // Si no esta el producto lo añadimos. Esto es porque no podemos cambiar la cantidad
-        if (!contenido.contains(id))
+        if (!contenido.contains(id)) {
             contenido.add(id);
+            // Lo marcamos como reservado
+            productoServicio.marcarComoReservado(id, true);
+        }
         // Almacenamos en la sesión el carrito y el número de items
         session.setAttribute("carrito", contenido);
         session.setAttribute("items_carrito", contenido.size());
@@ -126,6 +138,8 @@ public class PurchaseController {
             return "redirect:/public";
         // Borramos el contenido
         contenido.remove(id);
+        // Desmarcamos como reservado
+        productoServicio.marcarComoReservado(id, false);
         // Si está vacío, elimamos carrito de la sesión
         if (contenido.isEmpty()) {
             session.removeAttribute("carrito");

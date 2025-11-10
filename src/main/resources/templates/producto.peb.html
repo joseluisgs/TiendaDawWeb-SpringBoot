@@ -93,9 +93,16 @@
                     <!-- Action Buttons -->
                     {% if isAuthenticated and currentUser.email != producto.propietario.email %}
                     <div class="d-grid gap-3 mb-3">
+                        <!-- Si no está en el carrito -->
+                        {% if not producto.reservado %}
                         <button class="btn btn-success btn-lg action-btn" onclick="addToCart({{ producto.id }})">
                             <i class="bi bi-cart-plus"></i> Añadir al Carrito
                         </button>
+                        {% else %}
+                        <button class="btn btn-secondary btn-lg action-btn" disabled>
+                            <i class="bi bi-cart-x"></i> Producto Reservado
+                        </button>
+                        {% endif %}
                         <button class="btn btn-outline-danger btn-lg action-btn" id="favoriteBtn" onclick="toggleFavorite({{ producto.id }})">
                             <i class="bi bi-heart{% if isFavorite %}-fill{% endif %}" id="favoriteIcon"></i>
                             <span id="favoriteText">{% if isFavorite %}Quitar de Favoritos{% else %}Añadir a Favoritos{% endif %}</span>

@@ -167,4 +167,12 @@ public class ProductService {
             repositorio.save(product);
         }
     }
+
+    public void marcarComoReservado(Long id, boolean b) {
+        Product product = findById(id);
+        if (product != null) {
+            product.setReservado(b);
+            repositorio.save(product);
+        }
+    }
 }

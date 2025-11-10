@@ -33,18 +33,16 @@ public class Product {
     @ManyToOne
     private User propietario;
 
+    @Column(name = "reservado", nullable = false)
+    private boolean reservado = false;
     @ManyToOne
     private Purchase compra;
-
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
     @Column(name = "deleted_by")
     private String deletedBy;
-
     @Column(name = "views", nullable = false)
     private Long views = 0L;
 
@@ -66,6 +64,7 @@ public class Product {
         this.categoria = ProductCategory.fromString(categoria);
         this.propietario = propietario;
     }
+
 
     public long getId() {
         return id;
@@ -228,5 +227,13 @@ public class Product {
                 ", propietario=" + propietario +
                 ", compra=" + compra +
                 '}';
+    }
+
+    public boolean isReservado() {
+        return reservado;
+    }
+
+    public void setReservado(boolean reservado) {
+        this.reservado = reservado;
     }
 }

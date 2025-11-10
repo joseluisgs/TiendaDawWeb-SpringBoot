@@ -78,10 +78,14 @@
                         </div>
                         {% if isAuthenticated and currentUser.email != producto.propietario.email %}
                         <div class="col-md-6 text-end">
+                            {% if not producto.reservado %}
                             <a class="btn btn-success btn-sm" href="/app/carrito/add/{{ producto.id }}"
                                onclick="event.stopPropagation();">
                                 <i class="bi bi-cart-plus"></i> {{ message('btn.buy') }}
                             </a>
+                            {% else %}
+                            <div class="btn btn-secondary bg-secondary btn-sm">{{ message('product.reserved') }}</div>
+                            {% endif %}
                         </div>
                         {% endif %}
                     </div>
@@ -99,7 +103,9 @@
                 <p class="text-muted mb-0">
                     {% set endItem = (currentPage + 1) * size %}
                     {% set finalEndItem = endItem > totalElements ? totalElements : endItem %}
-                    {{ message('pagination.showing') }} {{ (currentPage * size) + 1 }} {{ message('pagination.to') }} {{ finalEndItem }} {{ message('pagination.of') }} {{ totalElements }} {{ message('pagination.products') }}
+                    {{ message('pagination.showing') }} {{ (currentPage * size) + 1 }} {{ message('pagination.to') }} {{
+                    finalEndItem }} {{ message('pagination.of') }} {{ totalElements }} {{ message('pagination.products')
+                    }}
                 </p>
             </div>
             <div class="col-md-6">
@@ -107,7 +113,8 @@
                     <!-- Página anterior -->
                     {% if hasPrevious %}
                     <li class="page-item">
-                        <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if categoriaActual %}categoria={{ categoriaActual }}&{% endif %}{% if minPrecio %}minPrecio={{ minPrecio }}&{% endif %}{% if maxPrecio %}maxPrecio={{ maxPrecio }}&{% endif %}page={{ currentPage - 1 }}&size={{ size }}">
+                        <a class="page-link"
+                           href="?{% if q %}q={{ q }}&{% endif %}{% if categoriaActual %}categoria={{ categoriaActual }}&{% endif %}{% if minPrecio %}minPrecio={{ minPrecio }}&{% endif %}{% if maxPrecio %}maxPrecio={{ maxPrecio }}&{% endif %}page={{ currentPage - 1 }}&size={{ size }}">
                             <i class="bi bi-chevron-left"></i> {{ message('pagination.previous') }}
                         </a>
                     </li>
@@ -119,27 +126,31 @@
 
                     <!-- Números de página -->
                     {% for i in range(0, totalPages) %}
-                        {% if i == currentPage %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ i + 1 }}</span>
-                        </li>
-                        {% elseif i >= (currentPage - 2) and i <= (currentPage + 2) %}
-                        <li class="page-item">
-                            <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if categoriaActual %}categoria={{ categoriaActual }}&{% endif %}{% if minPrecio %}minPrecio={{ minPrecio }}&{% endif %}{% if maxPrecio %}maxPrecio={{ maxPrecio }}&{% endif %}page={{ i }}&size={{ size }}">{{ i + 1 }}</a>
-                        </li>
-                        {% endif %}
+                    {% if i == currentPage %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ i + 1 }}</span>
+                    </li>
+                    {% elseif i >= (currentPage - 2) and i <= (currentPage + 2) %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?{% if q %}q={{ q }}&{% endif %}{% if categoriaActual %}categoria={{ categoriaActual }}&{% endif %}{% if minPrecio %}minPrecio={{ minPrecio }}&{% endif %}{% if maxPrecio %}maxPrecio={{ maxPrecio }}&{% endif %}page={{ i }}&size={{ size }}">{{
+                            i + 1 }}</a>
+                    </li>
+                    {% endif %}
                     {% endfor %}
 
                     <!-- Página siguiente -->
                     {% if hasNext %}
                     <li class="page-item">
-                        <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if categoriaActual %}categoria={{ categoriaActual }}&{% endif %}{% if minPrecio %}minPrecio={{ minPrecio }}&{% endif %}{% if maxPrecio %}maxPrecio={{ maxPrecio }}&{% endif %}page={{ currentPage + 1 }}&size={{ size }}">
+                        <a class="page-link"
+                           href="?{% if q %}q={{ q }}&{% endif %}{% if categoriaActual %}categoria={{ categoriaActual }}&{% endif %}{% if minPrecio %}minPrecio={{ minPrecio }}&{% endif %}{% if maxPrecio %}maxPrecio={{ maxPrecio }}&{% endif %}page={{ currentPage + 1 }}&size={{ size }}">
                             {{ message('pagination.next') }} <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
-                        <span class="page-link">{{ message('pagination.next') }} <i class="bi bi-chevron-right"></i></span>
+                        <span class="page-link">{{ message('pagination.next') }} <i
+                                class="bi bi-chevron-right"></i></span>
                     </li>
                     {% endif %}
                 </ul>
