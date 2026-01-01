@@ -105,6 +105,97 @@ docker-compose logs -f waladaw
 docker-compose down
 ```
 
+## ⚒️ Diagrama
+
+```mermaid
+classDiagram
+    direction TB
+
+    class User {
+        +long id
+        +String nombre
+        +String apellidos
+        +String avatar
+        +Date fechaAlta
+        +String email
+        +String password
+        +Role rol
+        +Boolean deleted
+    }
+
+    <<enumeration>> Role
+    class Role {
+        USER
+        ADMIN
+    }
+
+    class Product {
+        +long id
+        +String nombre
+        +float precio
+        +String imagen
+        +String descripcion
+        +ProductCategory categoria
+        +boolean reservado
+        +LocalDateTime reservaExpira
+        +Boolean deleted
+        +Long views
+        +getImagenOrDefault()
+    }
+
+    <<enumeration>> ProductCategory
+    class ProductCategory {
+        SMARTPHONES
+        LAPTOPS
+        AUDIO
+        GAMING
+        ACCESSORIES
+    }
+
+    class Purchase {
+        +long id
+        +Date fechaCompra
+        +Double total
+        +calculateTotal()
+        +addProduct(Product)
+    }
+
+    class CarritoItem {
+        +long id
+        +int cantidad
+        +getSubtotal()
+    }
+
+    class Favorite {
+        +long id
+        +Date fechaCreacion
+    }
+
+    class Rating {
+        +long id
+        +int puntuacion
+        +String comentario
+        +Date fechaCreacion
+    }
+
+    %% RELACIONES
+    User "*" -- "1" Role : tiene
+    User "1" -- "*" Product : propietario
+    User "1" -- "*" Purchase : realiza (propietario)
+    User "1" -- "*" CarritoItem : gestiona
+    User "1" -- "*" Favorite : marca
+    User "1" -- "*" Rating : escribe
+
+    Product "*" -- "1" ProductCategory : categorizado
+    Product "*" -- "0..1" Purchase : pertenece a (compra)
+    Product "1" -- "*" CarritoItem : en línea de carrito
+    Product "1" -- "*" Favorite : es favorito de
+    Product "1" -- "*" Rating : valorado con
+
+    Purchase "1" --> "*" Product : productos (List)
+
+```
+
 ## 📂 Estructura del Proyecto
 
 ```
